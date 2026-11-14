@@ -35,7 +35,7 @@ export default function SearchOverlay() {
   return (
     <AnimatePresence>
       {searchOpen && (
-        <motion.div className="fixed inset-0 z-[60] overflow-y-auto bg-white/95 backdrop-blur-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div className="fixed inset-0 z-[60] overflow-y-auto bg-white lg:bg-white/95 lg:backdrop-blur-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="container-x max-w-4xl pb-16 pt-6 sm:pt-12">
             <div className="flex justify-end"><button onClick={() => setSearch(false)} className="rounded-full p-2 hover:bg-plum-50" aria-label="Close search"><FiX size={26} /></button></div>
             <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) go(q.trim()) }} className="mt-2 flex items-center gap-4 border-b-2 border-plum-700 pb-3">

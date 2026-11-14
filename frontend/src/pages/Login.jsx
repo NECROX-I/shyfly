@@ -39,9 +39,9 @@ export default function Login() {
           <div><label className="label">Email</label><input type="email" className="input" value={f.email} onChange={on('email')} required autoComplete="email" /></div>
           <div><label className="label">Password</label><input type="password" className="input" value={f.password} onChange={on('password')} required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} /></div>
         </div>
-        {mode === 'login' && <Link to="/forgot-password" className="mt-3 block text-right text-sm text-plum-700 underline underline-offset-4 hover:text-rose-500">Forgot password?</Link>}
+        {mode === 'login' && <Link to="/forgot-password" className="mt-1 block py-2.5 text-right text-sm text-plum-700 underline underline-offset-4 hover:text-rose-500">Forgot password?</Link>}
         <button disabled={busy} className="btn-plum btn-sheen mt-6 w-full">{busy ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Sign up'}</button>
-        <p className="mt-5 text-center text-sm text-plum-800/70">{mode === 'login' ? 'New to Shyfly?' : 'Already have an account?'} <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="font-medium text-rose-500 underline">{mode === 'login' ? 'Create an account' : 'Log in'}</button></p>
+        <p className="mt-5 text-center text-sm text-plum-800/70">{mode === 'login' ? 'New to Shyfly?' : 'Already have an account?'} <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="inline-block py-2.5 font-medium text-rose-500 underline">{mode === 'login' ? 'Create an account' : 'Log in'}</button></p>
       </form>
     </div>
   )

@@ -19,6 +19,18 @@ exports.getCategories = asyncHandler(async (req, res) => {
   res.json({ success: true, categories: tree });
 });
 
+// ── Home page in ONE request (most-loved + a shelf per category), cached 30s ──
+let homeCache = { at: 0, data: null };
+exports.home = asyncHandler(async (req, res) => {
+  res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
+  if (homeCache.data && Date.now() - homeCache.at < 30 * 1000) return res.json(homeCache.data);
+  const tops = await Category.find({ isActive: true, parent: null }).sort({ sortOrder: 1, name: 1 }).select('slug');
+  const q = (f) => Product.find({ isActive: true, ...f }).select(CARD_FIELDS).populate('category', 'name slug').populate('subCategory', 'name slug').sort({ soldCount: -1, createdAt: -1 });
+  const [mostLoved, ...shelves] = await Promise.all([q({}).limit(8), ...tops.map((c) => q({ category: c._id }).limit(10))]);
+  homeCache = { at: Date.now(), data: { success: true, mostLoved, shelves: Object.fromEntries(tops.map((c, i) => [c.slug, shelves[i]])) } };
+  res.json(homeCache.data);
+});
+
 // ── Product list with filters / sort / facets ──────────────────
 exports.getProducts = asyncHandler(async (req, res) => {
   const { q, category, sub, minPrice, maxPrice, sort = 'newest', featured, isNew, sale, inStock } = req.query;

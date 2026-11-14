@@ -203,7 +203,7 @@ export default function ProductDetail() {
           <div>
             <p className="eyebrow">{p.brand}</p>
             <h1 className="mt-2 font-display text-4xl font-semibold leading-tight text-plum-800 sm:text-5xl">{p.name}</h1>
-            {p.rating?.count > 0 && <a href="#reviews" className="mt-3 inline-flex items-center gap-2"><Stars value={p.rating.avg} size={15} /><span className="text-sm text-plum-700/70 underline underline-offset-4">{p.rating.avg} · {p.rating.count} reviews</span></a>}
+            {p.rating?.count > 0 && <a href="#reviews" className="mt-1 inline-flex items-center gap-2 py-2.5"><Stars value={p.rating.avg} size={15} /><span className="text-sm text-plum-700/70 underline underline-offset-4">{p.rating.avg} · {p.rating.count} reviews</span></a>}
             <div className="mt-5 flex flex-wrap items-baseline gap-3">
               <span className="text-3xl font-semibold text-plum-800">{inr(p.price)}</span>
               {off > 0 && <><span className="text-lg text-plum-700/50 line-through">{inr(p.mrp)}</span><span className="rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-500">Save {inr(p.mrp - p.price)} ({off}%)</span></>}
@@ -231,9 +231,9 @@ export default function ProductDetail() {
                 </>
               )}
               <div className="mt-4 flex flex-wrap gap-5 text-sm text-plum-800">
-                <button onClick={() => { const r = toggleCompare(p); if (r === 'full') toast.error('You can compare up to 4 items') }} className="inline-flex items-center gap-2 hover:text-rose-500"><FiShuffle /> {inCompare ? 'In compare' : 'Compare'}</button>
-                <button onClick={share} className="inline-flex items-center gap-2 hover:text-rose-500"><FiShare2 /> Share</button>
-                {cfg.whatsapp && <a href={waLink(cfg.whatsapp, `Hi Shyfly! I'd like to order: ${p.name}${colorText}${sizeText}\n${window.location.href}`)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:text-green-600"><FaWhatsapp /> Order on WhatsApp</a>}
+                <button onClick={() => { const r = toggleCompare(p); if (r === 'full') toast.error('You can compare up to 4 items') }} className="inline-flex items-center gap-2 py-2.5 hover:text-rose-500"><FiShuffle /> {inCompare ? 'In compare' : 'Compare'}</button>
+                <button onClick={share} className="inline-flex items-center gap-2 py-2.5 hover:text-rose-500"><FiShare2 /> Share</button>
+                {cfg.whatsapp && <a href={waLink(cfg.whatsapp, `Hi Shyfly! I'd like to order: ${p.name}${colorText}${sizeText}\n${window.location.href}`)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 py-2.5 hover:text-green-600"><FaWhatsapp /> Order on WhatsApp</a>}
               </div>
             </div>
 
@@ -262,7 +262,7 @@ export default function ProductDetail() {
 
       <AnimatePresence>
         {stickyOn && !allSold && (
-          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-[calc(58px+env(safe-area-inset-bottom,0px))] z-30 border-t border-plum-100 bg-white/95 p-3 backdrop-blur-xl lg:bottom-0">
+          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-[calc(58px+env(safe-area-inset-bottom,0px))] z-30 border-t border-plum-100 bg-white p-3 lg:bg-white/95 lg:backdrop-blur-xl lg:bottom-0">
             <div className="container-x flex items-center gap-4">
               <div className="hidden h-12 w-10 overflow-hidden rounded-lg sm:block"><ProductImage product={p} w={100} className="h-full w-full object-cover" /></div>
               <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{p.name}</p><p className="text-sm font-semibold text-plum-800">{inr(p.price)}</p></div>

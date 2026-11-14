@@ -21,25 +21,28 @@ const Digit = ({ n, l }) => (
   </div>
 )
 
-function MostLoved() {
+// own component so the 1-second tick re-renders only these three circles, not the product grid
+function Countdown() {
   const t = useCountdownToMidnight()
-  const [items, setItems] = useState(null)
-  useEffect(() => { shopAPI.products({ sort: 'popular', limit: 8 }).then((r) => setItems(r.data.products)).catch(() => setItems([])) }, [])
+  return <div className="flex gap-2"><Digit n={t.h} l="Hours" /><Digit n={t.m} l="Minutes" /><Digit n={t.s} l="Seconds" /></div>
+}
+
+function MostLoved({ items }) {
   return (
-    <section className="container-x py-14 sm:py-20">
+    <section className="container-x py-12 sm:py-20">
       <div className="flex flex-wrap items-center justify-between gap-5">
         <Reveal><p className="eyebrow">Bestsellers</p><h2 className="h-section mt-2">Customer most loved</h2></Reveal>
-        <div className="flex items-center gap-3 sm:gap-5">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-5">
           <div className="hidden text-right text-xs uppercase tracking-widest text-plum-700/60 sm:block">Today’s offers<br />end in</div>
-          <div className="flex gap-2"><Digit n={t.h} l="Hours" /><Digit n={t.m} l="Minutes" /><Digit n={t.s} l="Seconds" /></div>
-          <Link to="/shop?sort=popular" className="text-sm font-medium text-plum-800 underline underline-offset-4 hover:text-rose-500">See all products</Link>
+          <Countdown />
+          <Link to="/shop?sort=popular" className="inline-block py-2.5 text-sm font-medium text-plum-800 underline underline-offset-4 hover:text-rose-500">See all products</Link>
         </div>
       </div>
-      <div className="mt-10">
+      <div className="mt-8 sm:mt-10">
         {items === null ? <GridSkeleton n={8} cols="grid-cols-2 lg:grid-cols-4" /> : items.length === 0 ? (
           <p className="rounded-2xl bg-blush p-10 text-center text-plum-700">Products will appear here once you add them from the admin panel.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-9 sm:gap-x-6 lg:grid-cols-4">{items.map((p, i) => <Reveal key={p._id} delay={(i % 4) * 0.06}><ProductCard product={p} /></Reveal>)}</div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-6 sm:gap-y-9 lg:grid-cols-4">{items.map((p) => <ProductCard key={p._id} product={p} />)}</div>
         )}
       </div>
     </section>
@@ -50,6 +53,8 @@ const OCCASIONS = [['Wedding', 'wedding'], ['Festive', 'festive'], ['Party', 'pa
 
 export default function Home() {
   const cats = useCategories()
+  const [home, setHome] = useState(null)
+  useEffect(() => { shopAPI.home().then((r) => setHome(r.data)).catch(() => setHome({ mostLoved: [], shelves: {} })) }, [])
   const cfg = useConfig()
   const features = [
     [FiTruck, 'Free shipping', `On orders above ${inr(cfg.freeShippingMin)}`],
@@ -65,7 +70,7 @@ export default function Home() {
 
       <section className="container-x pt-3 sm:pt-5">
         <div className="grid gap-3 sm:gap-4 lg:grid-cols-12">
-          <div className="lg:col-span-7">{cfg.loaded ? <HeroCarousel key={cfg.content.heroSlides.length} slides={cfg.content.heroSlides} /> : <div className="skeleton h-full min-h-[620px] rounded-[28px] sm:min-h-[720px] md:min-h-[560px]" />}</div>
+          <div className="lg:col-span-7">{cfg.loaded ? <HeroCarousel key={cfg.content.heroSlides.length} slides={cfg.content.heroSlides} /> : <div className="skeleton h-full min-h-[500px] rounded-[28px] sm:min-h-[680px] md:min-h-[560px]" />}</div>
           <div className="lg:col-span-5">{cfg.loaded ? <PromoTiles tiles={cfg.content.promoTiles} /> : <div className="skeleton h-full min-h-[300px] rounded-[22px]" />}</div>
         </div>
       </section>
@@ -82,13 +87,13 @@ export default function Home() {
         </div>
       </div>
 
-      <MostLoved />
+      <MostLoved items={home ? home.mostLoved : null} />
 
       {/* a dedicated shelf per category */}
-      {cats.map((c, i) => <Shelf key={c._id} category={c} index={i} tone={i % 2 === 0 ? 'blush' : 'white'} />)}
+      {cats.map((c, i) => <Shelf key={c._id} category={c} index={i} products={home ? home.shelves[c.slug] || [] : null} tone={i % 2 === 0 ? 'blush' : 'white'} />)}
 
       {/* occasions */}
-      <section className="container-x py-16 sm:py-20">
+      <section className="cv-auto container-x py-14 sm:py-20">
         <Reveal className="text-center"><p className="eyebrow">Shop by occasion</p><h2 className="h-section mt-3">Whatever the moment</h2></Reveal>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           {OCCASIONS.map(([label, q], i) => (

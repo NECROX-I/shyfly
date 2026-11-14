@@ -10,6 +10,7 @@
   ::selection { background: #f9698f; color: #fff; }
   button, a { -webkit-tap-highlight-color: transparent; }
   img { @apply select-none; }
+  .grid > * { min-width: 0; }
   :focus-visible { outline: 2px solid #ec4876; outline-offset: 2px; }
 }
 
@@ -28,11 +29,15 @@
   .chip-on { @apply border-plum-700 bg-plum-700 text-white hover:border-plum-700; }
   .eyebrow { @apply text-[11px] font-medium uppercase tracking-[.32em] text-rose-500; }
   .h-section { @apply font-display text-4xl font-semibold leading-[1.05] text-plum-800 sm:text-5xl; }
-  .skeleton { background: linear-gradient(90deg, #f9eaf0 25%, #fdf4f7 50%, #f9eaf0 75%); background-size: 200% 100%; @apply animate-shimmer; }
+  .skeleton { background: #f9eaf0; animation: skel 1.6s ease-in-out infinite; }
   .card-lift { @apply transition-all duration-500 hover:-translate-y-1 hover:shadow-lift; }
 }
 
+@keyframes skel { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+
 @layer utilities {
+  .cv-auto { content-visibility: auto; contain-intrinsic-size: auto 700px; }
+  .spin-slow { animation: spin 40s linear infinite; }
   .no-scrollbar { scrollbar-width: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .text-shine { background: linear-gradient(100deg, #6b1544 20%, #ec4876 45%, #C9A24B 55%, #6b1544 80%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite; }
@@ -53,3 +58,9 @@ input[type=range].dual::-moz-range-thumb { pointer-events: auto; height: 18px; w
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* phones & tablets: keep only the cheap marquee running — decorative loops cost battery and frames */
+@media (max-width: 1023px) {
+  .animate-float, .animate-flutter, .animate-ping, .animate-pulse, .spin-slow { animation: none !important; }
+}
+.animate-marquee { will-change: transform; }

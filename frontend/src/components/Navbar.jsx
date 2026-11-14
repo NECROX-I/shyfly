@@ -33,13 +33,13 @@ export default function Navbar() {
   const link = 'relative py-3 text-[12.5px] font-medium uppercase tracking-[.2em] text-plum-800 transition hover:text-rose-500 after:absolute after:inset-x-0 after:bottom-1.5 after:h-px after:origin-left after:scale-x-0 after:bg-rose-500 after:transition hover:after:scale-x-100'
 
   return (
-    <header className={`sticky top-0 z-40 bg-white/90 backdrop-blur-xl transition-shadow duration-300 ${scrolled ? 'shadow-[0_8px_30px_-12px_rgba(107,21,68,.25)]' : 'border-b border-plum-50'}`} onMouseLeave={leave}>
+    <header className={`sticky top-0 z-40 bg-white lg:bg-white/90 lg:backdrop-blur-xl transition-shadow duration-300 ${scrolled ? 'shadow-[0_8px_30px_-12px_rgba(107,21,68,.25)]' : 'border-b border-plum-50'}`} onMouseLeave={leave}>
       <div className="container-x">
-        <div className={`flex items-center gap-4 transition-all duration-300 ${scrolled ? 'h-[56px] sm:h-[62px]' : 'h-[60px] sm:h-[76px]'}`}>
+        <div className={`flex items-center gap-4 transition-all duration-300 h-[60px] sm:h-[68px] ${scrolled ? 'lg:h-[62px]' : 'lg:h-[76px]'}`}>
           <button className="-ml-2 p-2 lg:hidden" onClick={() => setMenu(true)} aria-label="Menu"><FiMenu size={24} /></button>
 
           <Link to="/" className="shrink-0" aria-label="Shyfly home">
-            <img src="/logo-mark.png" alt="Shyfly" className={`w-auto transition-all duration-300 ${scrolled ? 'h-8 sm:h-10' : 'h-9 sm:h-[52px]'}`} width="84" height="52" />
+            <img src="/logo-mark.png" alt="Shyfly" className={`w-auto transition-all duration-300 h-9 sm:h-11 ${scrolled ? 'lg:h-10' : 'lg:h-[52px]'}`} width="84" height="52" />
           </Link>
 
           <button onClick={() => setSearch(true)} className="mx-auto hidden max-w-xl flex-1 items-center gap-3 rounded-full border border-plum-100 bg-blush px-5 py-2.5 text-left text-sm text-plum-700/60 transition hover:border-rose-300 hover:bg-white hover:shadow-soft md:flex">
@@ -110,7 +110,7 @@ export default function Navbar() {
       <AnimatePresence>
         {menuOpen && (
           <>
-            <motion.div className="fixed inset-0 z-50 bg-plum-950/50 backdrop-blur-sm lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMenu(false)} />
+            <motion.div className="fixed inset-0 z-50 bg-plum-950/50 lg:backdrop-blur-sm lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMenu(false)} />
             <motion.aside className="fixed inset-y-0 left-0 z-50 flex w-[86%] max-w-sm flex-col bg-white lg:hidden" initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.3 }}>
               <div className="flex items-center justify-between border-b border-plum-50 p-4">
                 <img src="/logo-mark.png" alt="Shyfly" className="h-11 w-auto" />

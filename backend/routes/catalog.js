@@ -5,6 +5,7 @@ const { protect } = require('../middleware/auth');
 const c = require('../controllers/catalogController');
 
 router.get('/categories', c.getCategories);
+router.get('/home', c.home);
 router.get('/suggest', c.suggest);
 router.post('/by-ids', c.byIds);
 router.get('/', c.getProducts);

@@ -171,11 +171,11 @@ export default function Shop() {
         </div>
       </section>
 
-      <div className="container-x grid gap-10 py-8 lg:grid-cols-[260px_1fr] lg:py-10">
+      <div className="container-x grid gap-10 py-8 grid-cols-[minmax(0,1fr)] lg:grid-cols-[260px_minmax(0,1fr)] lg:py-10">
         <aside className="hidden lg:block"><div className="sticky top-32 max-h-[calc(100vh-9rem)] overflow-y-auto pr-3 no-scrollbar"><FilterPanel facets={facets} params={params} set={set} cats={cats} category={subCat ? top : top} clear={clear} /></div></aside>
 
         <div>
-          <div className="sticky top-[56px] z-20 sm:top-[62px] -mx-4 flex items-center justify-between gap-3 border-b border-plum-50 bg-white/90 px-4 py-3 backdrop-blur-xl sm:mx-0 sm:px-0 lg:top-[118px]">
+          <div className="sticky top-[60px] z-20 sm:top-[68px] -mx-4 flex items-center justify-between gap-3 border-b border-plum-50 bg-white px-4 py-3 lg:bg-white/90 lg:backdrop-blur-xl sm:mx-0 sm:px-0 lg:top-[118px]">
             <button onClick={() => setSheet(true)} className="chip lg:hidden"><FiSliders size={15} /> Filters{activeChips.length > 0 && <span className="grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-[10px] text-white">{activeChips.length}</span>}</button>
             <p className="hidden text-sm text-plum-700/70 lg:block">{loading ? 'Loading…' : <><b className="text-plum-900">{meta.total}</b> {meta.total === 1 ? 'product' : 'products'}</>}</p>
             <div className="ml-auto flex items-center gap-3">
@@ -205,7 +205,7 @@ export default function Shop() {
               </div>
             ) : (
               <>
-                <motion.div layout className={`grid gap-x-3 gap-y-9 sm:gap-x-5 ${gridCls}`}>{products.map((p) => <ProductCard key={p._id} product={p} />)}</motion.div>
+                <div className={`grid gap-x-3 gap-y-9 sm:gap-x-5 ${gridCls}`}>{products.map((p) => <ProductCard key={p._id} product={p} />)}</div>
                 <div className="mt-14 text-center">
                   <p className="text-sm text-plum-700/60">Showing {products.length} of {meta.total}</p>
                   <div className="mx-auto mt-3 h-1 w-48 overflow-hidden rounded-full bg-plum-100"><div className="h-full rounded-full bg-rose-500 transition-all" style={{ width: `${(products.length / Math.max(1, meta.total)) * 100}%` }} /></div>

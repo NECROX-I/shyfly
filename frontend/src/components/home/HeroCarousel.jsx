@@ -27,7 +27,7 @@ export default function HeroCarousel({ slides: raw = [] }) {
   if (!s) return null
 
   return (
-    <div ref={box} onMouseMove={onMove} onMouseLeave={() => { mx.set(0); my.set(0) }} className="group relative isolate h-full min-h-[620px] overflow-hidden rounded-[28px] text-white sm:min-h-[720px] md:min-h-[560px]">
+    <div ref={box} onMouseMove={onMove} onMouseLeave={() => { mx.set(0); my.set(0) }} className="group relative isolate h-full min-h-[500px] overflow-hidden rounded-[28px] text-white sm:min-h-[680px] md:min-h-[560px]">
       <AnimatePresence mode="sync">
         <motion.div key={i} className={`absolute inset-0 bg-gradient-to-br ${s.bg}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.9 }}
           drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.15} onDragEnd={(_, info) => { if (info.offset.x < -70) go(1); else if (info.offset.x > 70) go(-1) }}>
@@ -48,10 +48,10 @@ export default function HeroCarousel({ slides: raw = [] }) {
               </motion.div>
             </div>
 
-            <div className="relative grid h-44 w-44 shrink-0 place-items-center sm:h-72 sm:w-72 md:h-[400px] md:w-[400px]">
-              <motion.div style={{ x: tx2, y: ty2 }} className="absolute inset-0 rounded-full border border-dashed border-white/30 [animation:spin_40s_linear_infinite]" />
-              <motion.div style={{ x: tx1, y: ty1 }} className="absolute inset-5 grid place-items-center rounded-full bg-white/10 shadow-[inset_0_0_60px_rgba(255,255,255,.15)] backdrop-blur-sm sm:inset-8">
-                {s.image ? <img src={s.image} alt={s.title.join(' ')} className="h-full w-full rounded-full object-cover" /> : <div className="h-3/5 w-3/5 text-white drop-shadow-[0_10px_30px_rgba(0,0,0,.25)]"><ProductArt kind={s.kind} glyphOnly className="h-full w-full" /></div>}
+            <div className="relative grid h-36 w-36 shrink-0 place-items-center sm:h-64 sm:w-64 md:h-[400px] md:w-[400px]">
+              <motion.div style={{ x: tx2, y: ty2 }} className="absolute inset-0 rounded-full border border-dashed border-white/30 spin-slow" />
+              <motion.div style={{ x: tx1, y: ty1 }} className="absolute inset-5 grid place-items-center rounded-full bg-white/10 shadow-[inset_0_0_60px_rgba(255,255,255,.15)] lg:backdrop-blur-sm sm:inset-8">
+                {s.image ? <img src={s.image} alt={s.title.join(' ')} className="h-full w-full rounded-full object-cover" /> : <div className="h-3/5 w-3/5 text-white lg:drop-shadow-[0_10px_30px_rgba(0,0,0,.25)]"><ProductArt kind={s.kind} glyphOnly className="h-full w-full" /></div>}
               </motion.div>
               <motion.div style={{ x: tx2, y: ty2 }} className="absolute -right-2 top-2 w-20 animate-float sm:w-28"><Butterfly /></motion.div>
               <motion.div style={{ x: tx1, y: ty1 }} className="absolute bottom-6 left-0"><Sparkle className="h-7 w-7 animate-float text-gold-300 sm:h-9 sm:w-9" /></motion.div>
@@ -64,10 +64,10 @@ export default function HeroCarousel({ slides: raw = [] }) {
 
       {SLIDES.length > 1 && <div className="absolute inset-x-0 bottom-5 z-20 flex items-center justify-center gap-2">
         {SLIDES.map((_, k) => (
-          <button key={k} onClick={() => setI(k)} aria-label={`Slide ${k + 1}`} className="relative h-1.5 w-12 overflow-hidden rounded-full bg-white/25">
+          <button key={k} onClick={() => setI(k)} aria-label={`Slide ${k + 1}`} className="group/d flex h-8 w-12 items-center"><span className="relative block h-1.5 w-full overflow-hidden rounded-full bg-white/25">
             {k === i && <motion.span key={`p${i}`} className="absolute inset-y-0 left-0 bg-white" initial={{ width: 0 }} animate={{ width: '100%' }} transition={{ duration: DUR, ease: 'linear' }} />}
             {k < i && <span className="absolute inset-0 bg-white" />}
-          </button>
+          </span></button>
         ))}
       </div>}
       <button onClick={() => go(-1)} aria-label="Previous" className="absolute left-3 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/15 p-2.5 opacity-0 backdrop-blur transition hover:bg-white/30 group-hover:opacity-100 md:block"><FiChevronLeft size={20} /></button>

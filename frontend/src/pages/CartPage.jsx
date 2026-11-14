@@ -18,24 +18,24 @@ export default function CartPage() {
     <div className="container-x py-10">
       <SEO title="Your bag" noindex />
       <h1 className="h-section">Your bag</h1>
-      <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_380px]">
+      <div className="mt-8 grid gap-10 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-5">
           <FreeShipBar subtotal={subtotal} />
           {items.map((i) => (
-            <div key={i.key} className="flex gap-5 rounded-2xl border border-plum-100 p-4">
-              <Link to={`/product/${i.slug}`} className="h-32 w-28 shrink-0 overflow-hidden rounded-xl bg-plum-50"><ProductImage product={{ name: i.name, images: i.image ? [{ url: i.image }] : [], category: i.category }} w={260} className="h-full w-full object-cover" /></Link>
-              <div className="flex flex-1 flex-col">
-                <Link to={`/product/${i.slug}`} className="font-medium">{i.name}</Link>
+            <div key={i.key} className="flex gap-3 rounded-2xl border border-plum-100 p-3 sm:gap-5 sm:p-4">
+              <Link to={`/product/${i.slug}`} className="h-28 w-20 shrink-0 overflow-hidden rounded-xl bg-plum-50 sm:h-32 sm:w-28"><ProductImage product={{ name: i.name, images: i.image ? [{ url: i.image }] : [], category: i.category }} w={260} className="h-full w-full object-cover" /></Link>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <Link to={`/product/${i.slug}`} className="py-1 font-medium leading-snug">{i.name}</Link>
                 <p className="mt-1 text-sm text-plum-700/60">{[i.color, i.size && `Size ${i.size}`].filter(Boolean).join(' · ')}</p>
-                <div className="mt-auto flex items-center justify-between">
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center rounded-full border border-plum-100">
-                    <button onClick={() => setQty(i.key, i.qty - 1)} disabled={i.qty <= 1} className="p-2.5 disabled:opacity-30"><FiMinus size={14} /></button><span className="w-8 text-center">{i.qty}</span>
-                    <button onClick={() => setQty(i.key, i.qty + 1)} disabled={i.qty >= (i.max || 10)} className="p-2.5 disabled:opacity-30"><FiPlus size={14} /></button>
+                    <button onClick={() => setQty(i.key, i.qty - 1)} disabled={i.qty <= 1} className="p-3 disabled:opacity-30"><FiMinus size={14} /></button><span className="w-7 text-center">{i.qty}</span>
+                    <button onClick={() => setQty(i.key, i.qty + 1)} disabled={i.qty >= (i.max || 10)} className="p-3 disabled:opacity-30"><FiPlus size={14} /></button>
                   </div>
                   <b className="text-lg text-plum-800">{inr(i.price * i.qty)}</b>
                 </div>
               </div>
-              <button onClick={() => remove(i.key)} className="self-start p-1 text-plum-300 hover:text-rose-500" aria-label="Remove"><FiTrash2 /></button>
+              <button onClick={() => remove(i.key)} className="self-start p-2 text-plum-300 hover:text-rose-500" aria-label="Remove"><FiTrash2 /></button>
             </div>
           ))}
         </div>

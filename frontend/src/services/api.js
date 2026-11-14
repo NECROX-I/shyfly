@@ -39,6 +39,7 @@ export const authAPI = {
 
 export const shopAPI = {
   categories: () => api.get('/products/categories'),
+  home: () => api.get('/products/home'),
   products: (params) => api.get('/products', { params }),
   suggest: (q) => api.get('/products/suggest', { params: { q } }),
   one: (slug) => api.get(`/products/${slug}`),

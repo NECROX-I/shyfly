@@ -31,7 +31,7 @@ export default function CartDrawer() {
     <AnimatePresence>
       {cartOpen && (
         <>
-          <motion.div className="fixed inset-0 z-[55] bg-plum-950/50 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCart(false)} />
+          <motion.div className="fixed inset-0 z-[55] bg-plum-950/50 lg:backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCart(false)} />
           <motion.aside className="fixed inset-y-0 right-0 z-[56] flex w-full max-w-md flex-col bg-white shadow-2xl" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.32, ease: [0.22, 1, 0.36, 1] }}>
             <div className="flex items-center justify-between border-b border-plum-50 px-5 py-4">
               <h2 className="font-display text-3xl font-semibold text-plum-800">Your bag <span className="text-lg text-plum-700/50">({items.reduce((a, i) => a + i.qty, 0)})</span></h2>
@@ -60,9 +60,9 @@ export default function CartDrawer() {
                           <p className="mt-1 text-xs text-plum-700/60">{[i.color, i.size && `Size ${i.size}`].filter(Boolean).join(' · ')}</p>
                           <div className="mt-auto flex items-center justify-between">
                             <div className="flex items-center rounded-full border border-plum-100">
-                              <button onClick={() => setQty(i.key, i.qty - 1)} className="p-2.5 disabled:opacity-30" disabled={i.qty <= 1} aria-label="Less"><FiMinus size={14} /></button>
+                              <button onClick={() => setQty(i.key, i.qty - 1)} className="p-3 disabled:opacity-30" disabled={i.qty <= 1} aria-label="Less"><FiMinus size={14} /></button>
                               <span className="w-7 text-center text-sm font-medium">{i.qty}</span>
-                              <button onClick={() => setQty(i.key, i.qty + 1)} className="p-2.5 disabled:opacity-30" disabled={i.qty >= (i.max || 10)} aria-label="More"><FiPlus size={14} /></button>
+                              <button onClick={() => setQty(i.key, i.qty + 1)} className="p-3 disabled:opacity-30" disabled={i.qty >= (i.max || 10)} aria-label="More"><FiPlus size={14} /></button>
                             </div>
                             <p className="font-semibold text-plum-800">{inr(i.price * i.qty)}</p>
                           </div>

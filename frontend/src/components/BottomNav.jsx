@@ -12,7 +12,7 @@ export default function BottomNav() {
   const item = ({ isActive }) => `relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium uppercase tracking-wider ${isActive ? 'text-rose-500' : 'text-plum-800/70'}`
   const dot = (n) => n > 0 && <span className="absolute right-[26%] top-1 grid h-4 min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[9px] text-white">{n}</span>
   return (
-    <nav className="safe-b fixed inset-x-0 bottom-0 z-30 flex border-t border-plum-100 bg-white/95 backdrop-blur-xl lg:hidden">
+    <nav className="safe-b fixed inset-x-0 bottom-0 z-30 flex border-t border-plum-100 bg-white lg:bg-white/95 lg:backdrop-blur-xl lg:hidden">
       <NavLink to="/" end className={item}><FiHome size={20} />Home</NavLink>
       <NavLink to="/shop" className={item}><FiGrid size={20} />Shop</NavLink>
       <NavLink to="/wishlist" className={item}><FiHeart size={20} />Wishlist{dot(wish)}</NavLink>

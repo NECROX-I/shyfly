@@ -71,7 +71,7 @@ export function ProductArt({ kind = 'ornaments', seed = '', className = '', glyp
         </>
       )}
       <g transform={glyphOnly ? '' : 'translate(14 14) scale(.72)'} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: glyphOnly ? 'inherit' : '#fff' }}>
-        <g style={{ filter: glyphOnly ? 'none' : 'drop-shadow(0 2px 3px rgba(107,21,68,.35))' }}>{glyph}</g>
+        <g>{glyph}</g>
       </g>
     </svg>
   )

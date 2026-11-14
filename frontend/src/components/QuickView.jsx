@@ -49,7 +49,7 @@ export default function QuickView() {
     <AnimatePresence>
       {quickView && (
         <motion.div className="fixed inset-0 z-[58] grid place-items-center p-3 sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <div className="absolute inset-0 bg-plum-950/55 backdrop-blur-sm" onClick={close} />
+          <div className="absolute inset-0 bg-plum-950/55 lg:backdrop-blur-sm" onClick={close} />
           <motion.div className="relative w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl" initial={{ y: 40, scale: 0.97 }} animate={{ y: 0, scale: 1 }} exit={{ y: 30, scale: 0.97 }} transition={{ type: 'spring', stiffness: 260, damping: 26 }}>
             <button onClick={close} className="absolute right-4 top-4 z-10 rounded-full bg-white/90 p-2 shadow hover:bg-plum-50" aria-label="Close"><FiX size={20} /></button>
             <Body p={quickView} close={close} />
