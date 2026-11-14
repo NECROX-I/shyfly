@@ -9,6 +9,7 @@ router.use(protect, adminOnly);
 router.get('/stats', c.stats);
 router.post('/upload', upload.array('images', 8), c.uploadImages);
 
+router.post('/products/bulk', c.bulkProducts);
 router.route('/products').get(c.listProducts).post(c.createProduct);
 router.route('/products/:id').get(c.getProduct).put(c.updateProduct).delete(c.deleteProduct);
 
@@ -18,6 +19,8 @@ router.route('/categories/:id').put(c.updateCategory).delete(c.deleteCategory);
 router.get('/orders', c.listOrders);
 router.put('/orders/:id', c.updateOrder);
 router.post('/orders/:id/refund', c.refundOrder);
+router.get('/orders/:id/invoice-link', c.invoiceLink);
+router.post('/orders/:id/send-invoice', c.sendInvoiceEmail);
 router.route('/settings').get(c.getSettings).put(c.updateSettings);
 
 router.route('/coupons').get(c.listCoupons).post(c.createCoupon);

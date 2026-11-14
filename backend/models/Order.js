@@ -38,12 +38,14 @@ const orderSchema = new mongoose.Schema({
   timeline: [{ status: String, note: String, at: { type: Date, default: Date.now }, _id: false }],
   courier: String, trackingId: String, notes: String, adminNotes: String,
   stockRestored: { type: Boolean, default: false },
+  invoiceToken: { type: String, index: true },
 }, { timestamps: true });
 
 orderSchema.index({ 'customer.phone': 1 });
 orderSchema.index({ createdAt: -1 });
 
 orderSchema.pre('validate', function (next) {
+  if (!this.invoiceToken) this.invoiceToken = require('crypto').randomBytes(12).toString('hex');
   if (!this.orderNumber) {
     const d = new Date();
     const ymd = `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;

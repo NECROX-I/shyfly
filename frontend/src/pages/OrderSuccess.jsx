@@ -4,12 +4,14 @@ import { motion } from 'framer-motion'
 import { FiCheck } from 'react-icons/fi'
 import SEO from '../components/SEO'
 import { Butterfly } from '../lib/art'
-import { inr } from '../lib/format'
+import { inr, invoicePdfUrl } from '../lib/format'
+import { useConfig } from '../lib/hooks'
 
 export default function OrderSuccess() {
   const { orderNumber } = useParams()
   const { state } = useLocation()
   const order = state?.order
+  const cfg = useConfig()
   const confetti = useMemo(() => Array.from({ length: 26 }, (_, i) => ({ i, x: Math.random() * 100, d: Math.random() * 0.8, c: ['#f9698f', '#C9A24B', '#ffc7d9', '#6b1544'][i % 4], r: Math.random() * 360 })), [])
   useEffect(() => { window.scrollTo(0, 0) }, [])
   return (
@@ -31,8 +33,9 @@ export default function OrderSuccess() {
             <div className="flex justify-between border-t border-plum-100 pt-3 text-lg font-semibold text-plum-800"><span>Total</span><span>{inr(order.total)}</span></div>
           </>}
         </div>
+        {order?.customer?.email && cfg.invoiceEmail && <p className="mt-5 rounded-2xl bg-green-50 p-3 text-sm text-green-800">✉️ We’ve emailed your invoice to <b>{order.customer.email}</b></p>}
         <p className="mt-5 text-sm text-plum-700/70">Save your order number — you’ll need it with your phone number to track this order.</p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3"><Link to={`/track?order=${orderNumber}`} className="btn-plum">Track order</Link>{state?.phone && <Link to={`/invoice?order=${orderNumber}&phone=${state.phone}`} target="_blank" className="btn-outline">Invoice</Link>}<Link to="/shop" className="btn-outline">Keep shopping</Link></div>
+        <div className="mt-8 flex flex-wrap justify-center gap-3"><Link to={`/track?order=${orderNumber}`} className="btn-plum">Track order</Link>{order && <a href={invoicePdfUrl(order, state?.phone)} target="_blank" rel="noreferrer" className="btn-outline">Download invoice (PDF)</a>}<Link to="/shop" className="btn-outline">Keep shopping</Link></div>
       </div>
     </div>
   )

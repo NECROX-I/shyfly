@@ -14,7 +14,7 @@ exports.storeConfig = asyncHandler(async (req, res) => {
     config: {
       freeShippingMin: S.freeShippingMin, shippingFee: S.shippingFee, codFee: S.codFee, codMax: S.codMax,
       codEnabled: S.codEnabled, returnWindowDays: S.returnWindowDays, onlinePayment: keys && S.onlineEnabled,
-      whatsapp: S.whatsapp, announcements: S.announcements,
+      invoiceEmail: require('../utils/email').emailEnabled(), whatsapp: S.whatsapp, announcements: S.announcements,
       store: { name: S.storeName, businessName: S.businessName, address: S.address, gstin: S.gstin, phone: S.supportPhone, email: S.supportEmail },
       delivery: { min: S.deliveryMinDays + S.processingDays, max: S.deliveryMaxDays + S.processingDays },
       content: {

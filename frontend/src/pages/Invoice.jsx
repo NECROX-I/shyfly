@@ -2,21 +2,21 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { orderAPI } from '../services/api'
 import { useConfig } from '../lib/hooks'
-import { inr, fmtDate, errMsg } from '../lib/format'
+import { inr, fmtDate, errMsg, API_BASE } from '../lib/format'
 
 export default function Invoice() {
   const [sp] = useSearchParams()
   const cfg = useConfig()
   const [o, setO] = useState(null)
   const [err, setErr] = useState('')
-  useEffect(() => { orderAPI.track({ orderNumber: sp.get('order'), phone: sp.get('phone') }).then((r) => setO(r.data.order)).catch((e) => setErr(errMsg(e, 'Invoice not found'))) }, []) // eslint-disable-line
+  useEffect(() => { orderAPI.invoice({ order: sp.get('order'), phone: sp.get('phone'), t: sp.get('t') }).then((r) => setO(r.data.order)).catch((e) => setErr(errMsg(e, 'Invoice not found'))) }, []) // eslint-disable-line
   if (err) return <p className="p-10 text-center text-rose-600">{err}</p>
   if (!o) return <p className="p-10 text-center">Loading invoice…</p>
   const st = cfg.store || {}
   const addr = [o.address.line1, o.address.line2, o.address.landmark, `${o.address.city}, ${o.address.state} - ${o.address.pincode}`].filter(Boolean).join(', ')
   return (
     <div className="mx-auto max-w-3xl bg-white p-6 text-[14px] text-plum-950 print:p-0 sm:p-10">
-      <div className="mb-6 flex justify-end gap-3 print:hidden"><button onClick={() => window.print()} className="btn-plum !py-2.5">Print / Save as PDF</button></div>
+      <div className="mb-6 flex flex-wrap justify-end gap-3 print:hidden"><a href={`${API_BASE}/orders/invoice.pdf?order=${sp.get('order')}&${sp.get('t') ? `t=${sp.get('t')}` : `phone=${sp.get('phone') || ''}`}`} className="btn-plum !py-2.5">Download PDF</a><button onClick={() => window.print()} className="btn-outline !py-2.5">Print</button></div>
       <div className="flex items-start justify-between border-b-2 border-plum-800 pb-5">
         <div><img src="/logo-mark.png" alt="Shyfly" className="h-14" /><p className="mt-2 font-semibold">{st.businessName || st.name || 'Shyfly'}</p>{st.address && <p className="max-w-xs text-plum-700/80">{st.address}</p>}{st.gstin && <p>GSTIN: {st.gstin}</p>}{(st.phone || st.email) && <p className="text-plum-700/80">{[st.phone, st.email].filter(Boolean).join(' · ')}</p>}</div>
         <div className="text-right"><h1 className="font-display text-4xl font-semibold text-plum-800">Invoice</h1><p className="mt-1">No: <b>{o.orderNumber}</b></p><p>Date: {fmtDate(o.createdAt)}</p></div>

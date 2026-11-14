@@ -25,3 +25,8 @@ export const STEPS = ['placed', 'confirmed', 'packed', 'shipped', 'out_for_deliv
 export const waLink = (number, text) => `https://wa.me/${number}?text=${encodeURIComponent(text)}`
 
 export const errMsg = (e, fallback = 'Something went wrong') => e?.response?.data?.message || e?.message || fallback
+
+// Invoice links: the secret token (from the order) works without the phone number
+export const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
+export const invoicePdfUrl = (order, phone) => `${API_BASE}/orders/invoice.pdf?order=${order.orderNumber}&${order.invoiceToken ? `t=${order.invoiceToken}` : `phone=${phone || order.customer?.phone || ''}`}`
+export const invoicePageUrl = (order, phone) => `/invoice?order=${order.orderNumber}&${order.invoiceToken ? `t=${order.invoiceToken}` : `phone=${phone || order.customer?.phone || ''}`}`

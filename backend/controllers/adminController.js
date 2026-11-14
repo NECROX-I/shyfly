@@ -300,7 +300,8 @@ exports.setupStatus = asyncHandler(async (req, res) => {
       { key: 'razorpay', label: 'Online payments (Razorpay keys)', ok: rzpEnabled(), help: 'Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET on the server.' },
       { key: 'webhook', label: 'Payment webhook secret', ok: !!process.env.RAZORPAY_WEBHOOK_SECRET, help: 'Add RAZORPAY_WEBHOOK_SECRET and the webhook URL in the Razorpay dashboard.' },
       { key: 'cloudinary', label: 'Photo uploads (Cloudinary)', ok: cloud.isConfigured, help: 'Add the three CLOUDINARY_* keys. Until then, paste image URLs.' },
-      { key: 'email', label: 'Order & password emails (Resend)', ok: !!process.env.RESEND_API_KEY, help: 'Add RESEND_API_KEY and ADMIN_NOTIFY_EMAIL.' },
+      { key: 'email', label: `Invoice & order emails (${mailer.emailProvider() || 'not set'})`, ok: mailer.emailEnabled(), help: 'Add BREVO_API_KEY (no domain needed) or RESEND_API_KEY (needs a verified domain), plus EMAIL_FROM and ADMIN_NOTIFY_EMAIL. Until then use the WhatsApp button on each order.' },
+      { key: 'wa', label: 'Automatic WhatsApp invoice (optional)', ok: require('../utils/whatsapp').waEnabled(), help: 'Optional: needs Meta WhatsApp Cloud API. Without it, use the one-click WhatsApp button in Admin → Orders.' },
       { key: 'business', label: 'Business name & address filled in', ok: !!(S.businessName && S.address), help: 'Fill Admin → Store settings → Business details (needed for invoices).' },
       { key: 'whatsapp', label: 'WhatsApp number set', ok: !!S.whatsapp, help: 'Add it in Store settings → Business details.' },
       { key: 'secret', label: 'Strong login secret', ok: (process.env.JWT_SECRET || '').length >= 32, help: 'Set JWT_SECRET to a random 32+ character value.' },
@@ -332,4 +333,52 @@ exports.ordersCsv = asyncHandler(async (req, res) => {
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="shyfly-orders-${new Date().toISOString().slice(0, 10)}.csv"`);
   res.send('\ufeff' + [head.join(','), ...rows].join('\n'));
+});
+
+// ── Invoice delivery helpers ───────────────────────────────────
+const notify = require('../utils/notify');
+const mailer = require('../utils/email');
+
+exports.invoiceLink = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  if (!order) throw new ApiError(404, 'Order not found');
+  if (!order.invoiceToken) { order.invoiceToken = crypto.randomBytes(12).toString('hex'); await order.save(); }
+  const l = notify.links(order, req);
+  res.json({ success: true, ...l, phone: `91${order.customer.phone}`, emailReady: mailer.emailEnabled() && !!order.customer.email });
+});
+
+exports.sendInvoiceEmail = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  if (!order) throw new ApiError(404, 'Order not found');
+  if (!order.customer.email) throw new ApiError(400, 'This customer did not give an email address');
+  if (!mailer.emailEnabled()) throw new ApiError(400, 'Email is not set up yet (see Setup checklist). Use WhatsApp instead.');
+  if (!order.invoiceToken) { order.invoiceToken = crypto.randomBytes(12).toString('hex'); await order.save(); }
+  const ok = await mailer.sendInvoice(order, { pdf: await notify.pdfFor(order), link: notify.links(order, req).pdf });
+  if (!ok) throw new ApiError(400, 'The email service rejected the message. Check the Setup checklist and server logs.');
+  res.json({ success: true });
+});
+
+// ── Bulk product actions: delete / hide / show — selected ids, or everything matching the current filters ──
+exports.bulkProducts = asyncHandler(async (req, res) => {
+  const { action, ids, all, filter = {} } = req.body;
+  if (!['delete', 'hide', 'show'].includes(action)) throw new ApiError(400, 'Invalid action');
+  let match;
+  if (all) {
+    match = {};
+    if (filter.q) { const rx = new RegExp(escapeRegex(filter.q), 'i'); match.$or = [{ name: rx }, { tags: rx }]; }
+    if (filter.category) match.category = filter.category;
+    if (filter.status === 'active') match.isActive = true;
+    if (filter.status === 'hidden') match.isActive = false;
+  } else {
+    if (!Array.isArray(ids) || !ids.length) throw new ApiError(400, 'Select at least one product');
+    match = { _id: { $in: ids.slice(0, 2000) } };
+  }
+  if (action === 'delete') {
+    const prods = await Product.find(match).select('images');
+    prods.forEach((p) => p.images.forEach((i) => cloud.destroy(i.publicId)));
+    const r = await Product.deleteMany({ _id: { $in: prods.map((p) => p._id) } });
+    return res.json({ success: true, affected: r.deletedCount });
+  }
+  const r = await Product.updateMany(match, { $set: { isActive: action === 'show' } });
+  res.json({ success: true, affected: r.modifiedCount });
 });

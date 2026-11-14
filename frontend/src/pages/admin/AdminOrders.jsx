@@ -15,6 +15,18 @@ function Detail({ o, onSaved }) {
     setBusy(true)
     try { const r = await adminAPI.updateOrder(o._id, f); toast.success('Order updated'); onSaved(r.data.order) } catch (e) { toast.error(errMsg(e)) } finally { setBusy(false) }
   }
+  // one-click WhatsApp: opens WhatsApp (app/web) with the customer's number and a ready message — free, no API needed
+  const wa = async (kind) => {
+    try {
+      const { data } = await adminAPI.invoiceLink(o._id)
+      const first = o.customer.name.split(' ')[0]
+      const text = kind === 'invoice'
+        ? `Hi ${first}, thank you for shopping with Shyfly! 💗\nOrder ${o.orderNumber} · ${inr(o.total)}\nDownload your invoice: ${data.pdf}`
+        : `Hi ${first}, update on your Shyfly order ${o.orderNumber}: ${STATUS_LABEL[o.status] || o.status}.${o.trackingId ? `\nCourier: ${o.courier || ''} · Tracking ID: ${o.trackingId}` : ''}\nTrack here: ${data.track}`
+      window.open(`https://wa.me/${data.phone}?text=${encodeURIComponent(text)}`, '_blank')
+    } catch (e) { toast.error(errMsg(e)) }
+  }
+  const emailInvoice = async () => { try { await adminAPI.sendInvoice(o._id); toast.success(`Invoice emailed to ${o.customer.email}`) } catch (e) { toast.error(errMsg(e)) } }
   const refund = async () => {
     if (!window.confirm(`Refund ${inr(o.total)} to the customer's original payment method? This cannot be undone.`)) return
     try { const r = await adminAPI.refund(o._id, {}); toast.success('Refund initiated'); onSaved(r.data.order) } catch (e) { toast.error(errMsg(e)) }
@@ -41,7 +53,10 @@ function Detail({ o, onSaved }) {
         <div><label className="label">Internal note</label><input className="input" value={f.adminNotes} onChange={(e) => setF({ ...f, adminNotes: e.target.value })} /></div>
         <button onClick={save} disabled={busy} className="btn-plum w-full">{busy ? 'Saving…' : 'Save changes'}</button>
         <div className="flex flex-wrap gap-3">
-          <a href={`/invoice?order=${o.orderNumber}&phone=${o.customer.phone}`} target="_blank" rel="noreferrer" className="btn-outline !py-2.5 !text-[11px]">Print invoice</a>
+          <a href={`/invoice?order=${o.orderNumber}&phone=${o.customer.phone}`} target="_blank" rel="noreferrer" className="btn-outline !py-2.5 !text-[11px]">Invoice (PDF)</a>
+          <button onClick={() => wa('invoice')} className="btn-outline !border-green-600 !py-2.5 !text-[11px] !text-green-700 hover:!bg-green-600 hover:!text-white">WhatsApp invoice</button>
+          <button onClick={() => wa('update')} className="btn-outline !border-green-600 !py-2.5 !text-[11px] !text-green-700 hover:!bg-green-600 hover:!text-white">WhatsApp update</button>
+          {o.customer.email && <button onClick={emailInvoice} className="btn-outline !py-2.5 !text-[11px]">Email invoice</button>}
           {o.payment.method === 'razorpay' && ['paid', 'refund_pending'].includes(o.payment.status) && <button onClick={refund} className="btn-outline !border-rose-500 !py-2.5 !text-[11px] !text-rose-600 hover:!bg-rose-500 hover:!text-white">Refund {inr(o.total)} via Razorpay</button>}
         </div>
         <p className="text-xs text-plum-700/60">Cancelling restocks items automatically and emails the customer (if email is set up).</p>

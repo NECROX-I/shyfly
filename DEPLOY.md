@@ -53,12 +53,21 @@ This creates the category tree, the admin user, sample products and 2 coupons. O
 - Cloudinary: copy the three values. Uploads land in the `shyfly/` folder.
 - Resend: verify the sending domain (DNS records), then set `EMAIL_FROM="Shyfly <orders@yourdomain.in>"`. Without email, password-reset links print in the server log, and order emails are skipped.
 
+## 7b. Invoice delivery (email + WhatsApp)
+- Every confirmed order generates a PDF invoice (`backend/utils/invoicePdf.js`, fonts in `backend/assets/`). Customers get it by email as an attachment; the admin has one-click **WhatsApp invoice / update** buttons (wa.me links, free).
+- **Email provider (pick one):**
+  - **Brevo** (free tier, no domain): create account → Senders → add + verify the shop's email address → SMTP & API → create an API key → set `BREVO_API_KEY` and `EMAIL_FROM="Shyfly <that-verified-address>"`. (Free-mail senders such as Gmail can land in spam; a domain email is better when available.)
+  - **Resend**: needs a verified domain to send to customers → `RESEND_API_KEY`, `EMAIL_FROM="Shyfly <orders@yourdomain.in>"`.
+  - Render's free plan blocks classic SMTP ports, so use these HTTP APIs (already how the code works).
+- `PUBLIC_API_URL` is optional on Render (it provides `RENDER_EXTERNAL_URL`); set it if you use a custom API domain, otherwise invoice links in emails/WhatsApp point to the wrong host.
+- **Optional automatic WhatsApp** (Meta WhatsApp Cloud API): create a Meta Business app + WhatsApp number, create an approved *utility* template with 4 body variables — e.g. `Hi {{1}}, thank you for your Shyfly order {{2}} (₹{{3}}). Download your invoice: {{4}}` — then set `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_TEMPLATE` (+ `WHATSAPP_TEMPLATE_LANG`). Meta charges per business-initiated message and needs business verification; this path is untested here, so test it with your own number first.
+
 ## 8. Go-live test (do all of these on production)
 - [ ] COD order → appears in Admin → Orders; stock decreases
 - [ ] Online order (live ₹1 product) → "paid" automatically; webhook shows delivered in Razorpay dashboard
 - [ ] Admin → Refund works; Cancel restocks
 - [ ] Mark an order Delivered → customer requests a return → approve → received → refund (online order) works
-- [ ] Invoice prints with business name/GSTIN (fill Store settings first)
+- [ ] Invoice PDF downloads (Track Order) with business name/GSTIN (fill Store settings first); order email arrives with the PDF attached; Admin → Order → WhatsApp invoice opens WhatsApp with the right number
 - [ ] Pincode check on product page; a blocked pincode is rejected at checkout
 - [ ] Forgot-password email arrives and works
 - [ ] Mobile: browse, bag, checkout

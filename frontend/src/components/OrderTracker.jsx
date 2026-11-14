@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import ReturnModal from './ReturnModal'
 import { motion } from 'framer-motion'
 import { FiCheck, FiX } from 'react-icons/fi'
-import { STEPS, STATUS_LABEL, fmtDate, inr } from '../lib/format'
+import { STEPS, STATUS_LABEL, fmtDate, inr, invoicePdfUrl } from '../lib/format'
 import ProductImage from './ProductImage'
 
 const RSTATUS = { requested: ['Under review', 'bg-amber-50 text-amber-700'], approved: ['Approved — awaiting item', 'bg-blue-50 text-blue-700'], received: ['Item received', 'bg-indigo-50 text-indigo-700'], refunded: ['Refunded', 'bg-green-50 text-green-700'], exchanged: ['Exchange completed', 'bg-green-50 text-green-700'], rejected: ['Not approved', 'bg-rose-50 text-rose-700'], closed: ['Closed', 'bg-plum-50 text-plum-700'] }
@@ -80,7 +80,7 @@ export default function OrderTracker({ order, onCancel, phone, onReload }) {
       {order.returnInfo?.eligible && order.returnInfo.until && <span className="ml-3 text-xs text-plum-700/60">Eligible until {fmtDate(order.returnInfo.until)}</span>}
       {!order.returnInfo?.eligible && order.returnInfo?.reason && !order.returns?.length && <p className="mt-4 text-xs text-plum-700/60">{order.returnInfo.reason}</p>}
       {returning && <ReturnModal order={order} onClose={() => setReturning(false)} onDone={() => { setReturning(false); onReload?.() }} />}
-      {(phone || order.customer?.phone) && <Link to={`/invoice?order=${order.orderNumber}&phone=${phone || order.customer.phone}`} target="_blank" className="mt-4 mr-5 inline-block text-sm text-plum-700 underline underline-offset-4 hover:text-rose-500">View / print invoice</Link>}
+      {(order.invoiceToken || phone || order.customer?.phone) && <a href={invoicePdfUrl(order, phone)} target="_blank" rel="noreferrer" className="mt-4 mr-5 inline-block py-2 text-sm text-plum-700 underline underline-offset-4 hover:text-rose-500">Download invoice (PDF)</a>}
       {onCancel && ['placed', 'confirmed'].includes(order.status) && <button onClick={() => onCancel(order)} className="mt-4 text-sm text-rose-500 underline underline-offset-4">Cancel this order</button>}
     </div>
   )

@@ -7,6 +7,8 @@ const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { getSettings, checkPincode } = require('../utils/settings');
 const mail = require('../utils/email');
+const notify = require('../utils/notify');
+const crypto2 = require('crypto');
 const ReturnRequest = require('../models/ReturnRequest');
 
 const rzpEnabled = () => !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
@@ -50,7 +52,7 @@ exports.rzp = rzp;
 exports.restock = restock;
 exports.rzpEnabled = rzpEnabled;
 
-const markPaid = async (order, paymentId) => {
+const markPaid = async (order, paymentId, req) => {
   if (order.payment.status === 'paid' || order.payment.status === 'refund_pending') return order;
   if (order.status === 'cancelled') { // paid after we released the stock
     order.payment.status = 'refund_pending'; order.payment.razorpayPaymentId = paymentId;
@@ -61,7 +63,7 @@ const markPaid = async (order, paymentId) => {
   order.status = 'confirmed';
   order.timeline.push({ status: 'confirmed', note: 'Payment received' });
   await order.save();
-  mail.sendOrderPlaced(order);
+  notify.orderPlaced(order, req);
   return order;
 };
 
@@ -69,7 +71,7 @@ const publicOrder = (o) => ({
   _id: o._id, orderNumber: o.orderNumber, status: o.status, timeline: o.timeline, items: o.items,
   subtotal: o.subtotal, discount: o.discount, shipping: o.shipping, codFee: o.codFee, total: o.total,
   couponCode: o.couponCode, courier: o.courier, trackingId: o.trackingId, createdAt: o.createdAt,
-  eta: o.eta, customer: { name: o.customer.name, phone: o.customer.phone, email: o.customer.email },
+  invoiceToken: o.invoiceToken, eta: o.eta, customer: { name: o.customer.name, phone: o.customer.phone, email: o.customer.email },
   address: { line1: o.address.line1, line2: o.address.line2, landmark: o.address.landmark, city: o.address.city, state: o.address.state, pincode: o.address.pincode },
   payment: { method: o.payment.method, status: o.payment.status },
 });
@@ -144,7 +146,7 @@ exports.placeOrder = asyncHandler(async (req, res) => {
       razorpay = { orderId: rzOrder.id, amount: rzOrder.amount, keyId: process.env.RAZORPAY_KEY_ID };
     }
     await order.save();
-    if (paymentMethod === 'cod') mail.sendOrderPlaced(order);
+    if (paymentMethod === 'cod') notify.orderPlaced(order, req);
     res.status(201).json({ success: true, order: publicOrder(order), razorpay });
   } catch (e) {
     await restock(lines);
@@ -159,7 +161,7 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
   if (!safeEqual(expected, razorpay_signature)) throw new ApiError(400, 'Payment verification failed');
   const order = await Order.findOne({ 'payment.razorpayOrderId': razorpay_order_id });
   if (!order) throw new ApiError(404, 'Order not found');
-  await markPaid(order, razorpay_payment_id);
+  await markPaid(order, razorpay_payment_id, req);
   res.json({ success: true, order: publicOrder(order) });
 });
 
@@ -175,7 +177,7 @@ exports.razorpayWebhook = asyncHandler(async (req, res) => {
     const pay = event.payload?.payment?.entity;
     if (pay?.order_id) {
       const order = await Order.findOne({ 'payment.razorpayOrderId': pay.order_id });
-      if (order) await markPaid(order, pay.id);
+      if (order) await markPaid(order, pay.id, req);
     }
   }
   res.json({ received: true });
@@ -236,3 +238,30 @@ exports.cancelOrder = asyncHandler(async (req, res) => {
 });
 
 exports.publicOrder = publicOrder;
+
+// ── Invoice access: order number + (secret token from the email/WhatsApp link, OR the phone used at checkout) ──
+const findForInvoice = async (q) => {
+  const orderNumber = String(q.order || '').trim().toUpperCase();
+  const order = await Order.findOne({ orderNumber });
+  if (!order) return null;
+  const phone = String(q.phone || '').replace(/\D/g, '').slice(-10);
+  const t = String(q.t || '');
+  const okToken = t && order.invoiceToken && t.length === order.invoiceToken.length && crypto2.timingSafeEqual(Buffer.from(t), Buffer.from(order.invoiceToken));
+  return okToken || (phone && order.customer.phone === phone) ? order : null;
+};
+
+exports.invoiceJson = asyncHandler(async (req, res) => {
+  const order = await findForInvoice(req.query);
+  if (!order) throw new ApiError(404, 'Invoice not found');
+  res.json({ success: true, order: publicOrder(order) });
+});
+
+exports.invoicePdf = asyncHandler(async (req, res) => {
+  const order = await findForInvoice(req.query);
+  if (!order) throw new ApiError(404, 'Invoice not found');
+  const pdf = await notify.pdfFor(order);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="Invoice-${order.orderNumber}.pdf"`);
+  res.setHeader('Cache-Control', 'private, max-age=60');
+  res.send(pdf);
+});

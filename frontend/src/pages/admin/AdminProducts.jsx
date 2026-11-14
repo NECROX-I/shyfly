@@ -104,24 +104,56 @@ export default function AdminProducts() {
   const [cats, setCats] = useState([])
   const [edit, setEdit] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [sel, setSel] = useState(new Set())
+  const [allMatching, setAllMatching] = useState(false)
   const load = () => { setLoading(true); adminAPI.products({ q: dq, page }).then((r) => setData(r.data)).finally(() => setLoading(false)) }
   useEffect(() => { adminAPI.categories().then((r) => setCats(r.data.categories)) }, [])
-  useEffect(() => { setPage(1) }, [dq])
+  useEffect(() => { setPage(1); setSel(new Set()); setAllMatching(false) }, [dq])
+  useEffect(() => { setSel(new Set()); setAllMatching(false) }, [page])
   useEffect(load, [dq, page]) // eslint-disable-line
 
   const open = async (p) => { if (!p) return setEdit({}); const r = await adminAPI.product(p._id); setEdit(r.data.product) }
   const del = async (p) => { if (!window.confirm(`Delete "${p.name}" permanently?`)) return; try { await adminAPI.deleteProduct(p._id); toast.success('Deleted'); load() } catch (e) { toast.error(errMsg(e)) } }
 
+  const pageIds = data.products.map((p) => p._id)
+  const allOnPage = pageIds.length > 0 && pageIds.every((id) => sel.has(id))
+  const count = allMatching ? data.total : sel.size
+  const toggleAll = () => { setAllMatching(false); setSel(allOnPage ? new Set() : new Set(pageIds)) }
+  const toggleOne = (id) => { setAllMatching(false); setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n }) }
+  const bulk = async (action) => {
+    const verb = { delete: 'permanently DELETE', hide: 'hide', show: 'show' }[action]
+    if (!window.confirm(`${verb.charAt(0).toUpperCase() + verb.slice(1)} ${count} product${count > 1 ? 's' : ''}?${action === 'delete' ? ' This cannot be undone. Past orders keep their details.' : ''}`)) return
+    try {
+      const body = allMatching ? { action, all: true, filter: { q: dq } } : { action, ids: [...sel] }
+      const r = await adminAPI.bulkProducts(body)
+      toast.success(`${r.data.affected} product${r.data.affected === 1 ? '' : 's'} ${action === 'delete' ? 'deleted' : action === 'hide' ? 'hidden' : 'now live'}`)
+      setSel(new Set()); setAllMatching(false); load()
+    } catch (e) { toast.error(errMsg(e)) }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="font-display text-5xl font-semibold text-plum-800">Products <span className="text-2xl text-plum-700/40">{data.total}</span></h1><button onClick={() => open(null)} className="btn-plum"><FiPlus /> Add product</button></div>
       <input className="input max-w-sm" placeholder="Search products…" value={q} onChange={(e) => setQ(e.target.value)} />
+      {count > 0 && (
+        <div className="sticky top-2 z-20 flex flex-wrap items-center gap-3 rounded-2xl bg-plum-800 px-4 py-3 text-white shadow-lift">
+          <b>{count} selected</b>
+          {!allMatching && allOnPage && data.total > pageIds.length && <button onClick={() => setAllMatching(true)} className="text-sm underline">Select all {data.total} matching</button>}
+          <div className="ml-auto flex flex-wrap gap-2">
+            <button onClick={() => bulk('show')} className="rounded-full bg-white/15 px-4 py-2 text-xs font-medium uppercase tracking-wider hover:bg-white/25">Show</button>
+            <button onClick={() => bulk('hide')} className="rounded-full bg-white/15 px-4 py-2 text-xs font-medium uppercase tracking-wider hover:bg-white/25">Hide</button>
+            <button onClick={() => bulk('delete')} className="rounded-full bg-rose-500 px-4 py-2 text-xs font-medium uppercase tracking-wider hover:bg-rose-600">Delete</button>
+            <button onClick={() => { setSel(new Set()); setAllMatching(false) }} className="px-3 py-2 text-xs uppercase tracking-wider text-white/70 hover:text-white">Clear</button>
+          </div>
+        </div>
+      )}
       <div className="overflow-x-auto rounded-3xl bg-white shadow-soft">
         {loading ? <div className="skeleton h-64" /> : (
-          <table className="w-full min-w-[720px] text-left text-sm"><thead className="bg-blush text-xs uppercase tracking-wider text-plum-700/70"><tr><th className="p-4">Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Sold</th><th>Status</th><th /></tr></thead>
+          <table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-blush text-xs uppercase tracking-wider text-plum-700/70"><tr><th className="w-10 p-4"><input type="checkbox" className="h-4 w-4 accent-plum-700" checked={allOnPage} onChange={toggleAll} aria-label="Select all on this page" /></th><th className="p-2">Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Sold</th><th>Status</th><th /></tr></thead>
             <tbody>{data.products.map((p) => (
-              <tr key={p._id} className="border-t border-plum-50 hover:bg-blush/40">
-                <td className="p-3"><div className="flex items-center gap-3"><div className="h-14 w-11 shrink-0 overflow-hidden rounded-lg bg-plum-50"><ProductImage product={p} w={100} className="h-full w-full object-cover" /></div><span className="max-w-[240px] font-medium">{p.name}</span></div></td>
+              <tr key={p._id} className={`border-t border-plum-50 hover:bg-blush/40 ${sel.has(p._id) || allMatching ? 'bg-blush/60' : ''}`}>
+                <td className="p-4"><input type="checkbox" className="h-4 w-4 accent-plum-700" checked={allMatching || sel.has(p._id)} onChange={() => toggleOne(p._id)} aria-label={`Select ${p.name}`} /></td>
+                <td className="p-2"><div className="flex items-center gap-3"><div className="h-14 w-11 shrink-0 overflow-hidden rounded-lg bg-plum-50"><ProductImage product={p} w={100} className="h-full w-full object-cover" /></div><span className="max-w-[240px] font-medium">{p.name}</span></div></td>
                 <td>{p.category?.name}<span className="block text-xs text-plum-700/50">{p.subCategory?.name}</span></td>
                 <td>{inr(p.price)}{p.mrp > p.price && <span className="block text-xs text-plum-700/50 line-through">{inr(p.mrp)}</span>}</td>
                 <td className={totalStock(p) <= 5 ? 'font-semibold text-rose-500' : ''}>{totalStock(p)}</td><td>{p.soldCount}</td>

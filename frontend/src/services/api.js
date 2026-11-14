@@ -61,6 +61,7 @@ export const orderAPI = {
   cancel: (d) => api.post('/orders/cancel', d),
   mine: () => api.get('/orders/mine'),
   requestReturn: (d) => api.post('/orders/return', d),
+  invoice: (params) => api.get('/orders/invoice', { params }),
 }
 
 export const adminAPI = {
@@ -83,6 +84,9 @@ export const adminAPI = {
   deleteCoupon: (id) => api.delete(`/admin/coupons/${id}`),
   customers: () => api.get('/admin/customers'),
   messages: () => api.get('/admin/messages'),
+  bulkProducts: (d) => api.post('/admin/products/bulk', d),
+  invoiceLink: (id) => api.get(`/admin/orders/${id}/invoice-link`),
+  sendInvoice: (id) => api.post(`/admin/orders/${id}/send-invoice`),
   returns: (params) => api.get('/admin/returns', { params }),
   updateReturn: (id, d) => api.put(`/admin/returns/${id}`, d),
   admins: () => api.get('/admin/admins'),

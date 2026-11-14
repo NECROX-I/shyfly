@@ -23,6 +23,15 @@ Orders → click an order → set **Status** as you go: Confirmed → Packed →
 - **Refund an online payment:** open the order → **Refund via Razorpay**. Money goes back to the customer's original method (usually 5–7 working days).
 - **Invoice:** **Print invoice** button (print or save as PDF).
 
+### Sending the invoice to a customer
+- **Email (automatic):** if email is set up, every order email goes out with the **invoice PDF attached** to the customer's email address (they type it at checkout). Check Store settings → Setup checklist to see if email is on.
+- **WhatsApp (free, one click):** open the order → **WhatsApp invoice**. WhatsApp opens with the customer's number and a ready message containing the invoice PDF link — just press send. **WhatsApp update** does the same for status/tracking updates.
+- **Email again:** open the order → **Email invoice** (only shows if the customer gave an email).
+- The customer can also download the PDF anytime from Track Order or My account.
+
+### Deleting many products at once
+Products → tick the boxes (the top box ticks the whole page) → **Delete**, **Hide** or **Show** in the bar that appears. After ticking a full page, click **Select all N matching** to act on every product in the current search. Past orders keep their product details. Deleting cannot be undone — use **Hide** if unsure.
+
 ### Returns & exchanges
 Customers request these themselves from **Track Order** (or My account) once an order is **Delivered**, within your return window (Store settings → Return window; set 0 to turn returns off). You see them under **Returns** (and a banner on the Dashboard).
 1. **Approve** or **Reject** (write a message — the customer sees it on Track Order).

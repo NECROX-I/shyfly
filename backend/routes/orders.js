@@ -36,6 +36,8 @@ router.post('/return', trackLimiter, [
   body('items.*.variantId').isMongoId(), body('items.*.qty').isInt({ min: 1, max: 10 }),
   body('comment').optional().isLength({ max: 600 }),
 ], validate, rc.requestReturn);
+router.get('/invoice', trackLimiter, c.invoiceJson);
+router.get('/invoice.pdf', trackLimiter, c.invoicePdf);
 router.get('/track', trackLimiter, c.track);
 router.post('/cancel', trackLimiter, c.cancelOrder);
 router.get('/mine', protect, c.myOrders);

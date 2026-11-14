@@ -1,8 +1,13 @@
 const { Resend } = require('resend');
 
-const client = () => (process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null);
 const FROM = process.env.EMAIL_FROM || 'Shyfly <onboarding@resend.dev>';
 const inr = (n) => '₹' + Number(n).toLocaleString('en-IN');
+
+// Two providers, whichever key is set: Brevo (no domain needed — verify a sender address) or Resend (needs a verified domain to email customers).
+const provider = () => (process.env.BREVO_API_KEY ? 'brevo' : process.env.RESEND_API_KEY ? 'resend' : null);
+// Brevo needs a verified sender address in EMAIL_FROM; Resend can start with its test sender
+exports.emailEnabled = () => { const p = provider(); return !!p && (p === 'resend' || !!process.env.EMAIL_FROM); };
+exports.emailProvider = provider;
 
 const shell = (title, body) => `
 <div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;border:1px solid #f3d5df;border-radius:16px;overflow:hidden">
@@ -18,29 +23,56 @@ const itemsTable = (order) =>
     )
     .join('')}<tr><td style="padding-top:10px;font-weight:bold">Total</td><td style="text-align:right;font-weight:bold">${inr(order.total)}</td></tr></table>`;
 
-const send = async (payload) => {
-  const c = client();
-  if (!c) return;
+// attachments: [{ name, content: Buffer }]
+const send = async ({ to, subject, html, attachments }) => {
+  const p = provider();
+  if (!p) return false;
   try {
-    await c.emails.send({ from: FROM, ...payload });
+    if (p === 'resend') {
+      const r = await new Resend(process.env.RESEND_API_KEY).emails.send({ from: FROM, to, subject, html, attachments: attachments?.map((x) => ({ filename: x.name, content: x.content })) });
+      if (r?.error) throw new Error(r.error.message);
+    } else {
+      const m = FROM.match(/^\s*"?([^"<]*)"?\s*<([^>]+)>\s*$/);
+      const sender = m ? { name: m[1].trim() || 'Shyfly', email: m[2].trim() } : { name: 'Shyfly', email: FROM.trim() };
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST', headers: { 'api-key': process.env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ sender, to: [{ email: to }], subject, htmlContent: html, attachment: attachments?.map((x) => ({ name: x.name, content: Buffer.from(x.content).toString('base64') })) }),
+      });
+      if (!res.ok) throw new Error(`Brevo ${res.status}: ${(await res.text()).slice(0, 160)}`);
+    }
+    return true;
   } catch (e) {
     console.error('Email error:', e.message);
+    return false;
   }
 };
 
-exports.sendOrderPlaced = async (order) => {
+exports.sendOrderPlaced = async (order, ctx = {}) => {
+  const { pdf, link } = ctx;
   if (order.customer.email)
     await send({
       to: order.customer.email,
       subject: `Order ${order.orderNumber} confirmed — Shyfly`,
-      html: shell(`Thank you, ${order.customer.name}!`, `<p>Your order <b>${order.orderNumber}</b> is received.</p>${itemsTable(order)}<p style="font-size:13px;color:#8a6b79">Track anytime on our website using your order number and phone.</p>`),
+      html: shell(`Thank you, ${order.customer.name}!`, `<p>Your order <b>${order.orderNumber}</b> is received.</p>${itemsTable(order)}${pdf ? '<p style="font-size:13px;color:#555">Your invoice is attached as a PDF.</p>' : ''}${link ? `<p><a href="${link}" style="color:#6b1544">View / download invoice</a></p>` : ''}<p style="font-size:13px;color:#8a6b79">Track anytime on our website using your order number and phone.</p>`),
+      attachments: pdf ? [{ name: `Invoice-${order.orderNumber}.pdf`, content: pdf }] : undefined,
     });
   if (process.env.ADMIN_NOTIFY_EMAIL)
     await send({
       to: process.env.ADMIN_NOTIFY_EMAIL,
       subject: `🛍️ New order ${order.orderNumber} — ${inr(order.total)}`,
       html: shell('New order', `<p>${order.customer.name} · ${order.customer.phone}<br/>${order.payment.method.toUpperCase()} · ${order.payment.status}</p>${itemsTable(order)}`),
+      attachments: pdf ? [{ name: `Invoice-${order.orderNumber}.pdf`, content: pdf }] : undefined,
     });
+};
+
+// re-send the invoice on demand (admin button) — returns true/false
+exports.sendInvoice = async (order, ctx = {}) => {
+  if (!order.customer.email) return false;
+  return send({
+    to: order.customer.email, subject: `Your Shyfly invoice — ${order.orderNumber}`,
+    html: shell('Your invoice', `<p>Hi ${order.customer.name}, here is the invoice for order <b>${order.orderNumber}</b>.</p>${itemsTable(order)}${ctx.link ? `<p><a href="${ctx.link}" style="color:#6b1544">View / download invoice</a></p>` : ''}`),
+    attachments: ctx.pdf ? [{ name: `Invoice-${order.orderNumber}.pdf`, content: ctx.pdf }] : undefined,
+  });
 };
 
 exports.sendStatusUpdate = async (order) => {
@@ -58,9 +90,8 @@ exports.sendContact = async ({ name, email, phone, message }) => {
 };
 
 exports.sendPasswordReset = async (user, link) => {
-  if (!client()) return false;
-  await send({ to: user.email, subject: 'Reset your Shyfly password', html: shell('Reset your password', `<p>Hi ${user.name}, click below to choose a new password. This link works for 30 minutes.</p><p style="text-align:center;margin:26px 0"><a href="${link}" style="background:#6b1544;color:#fff;padding:13px 28px;border-radius:999px;text-decoration:none">Reset password</a></p><p style="font-size:12px;color:#8a6b79">If you did not ask for this, you can ignore this email.</p>`) });
-  return true;
+  if (!provider()) return false;
+  return send({ to: user.email, subject: 'Reset your Shyfly password', html: shell('Reset your password', `<p>Hi ${user.name}, click below to choose a new password. This link works for 30 minutes.</p><p style="text-align:center;margin:26px 0"><a href="${link}" style="background:#6b1544;color:#fff;padding:13px 28px;border-radius:999px;text-decoration:none">Reset password</a></p><p style="font-size:12px;color:#8a6b79">If you did not ask for this, you can ignore this email.</p>`) });
 };
 
 exports.sendReturnRequested = async (rr) => {
