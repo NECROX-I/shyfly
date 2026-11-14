@@ -75,11 +75,11 @@ function Form({ product, cats, onClose, onSaved }) {
         </div>
         <div className="mt-3 space-y-2">
           {f.variants.map((v, i) => (
-            <div key={i} className="grid grid-cols-[1fr_44px_1fr_80px_32px] items-center gap-2">
-              <input className="input !py-2" placeholder="Colour" value={v.color} onChange={(e) => setV(i, 'color', e.target.value)} />
+            <div key={i} className="flex flex-wrap items-center gap-2">
+              <input className="input !py-2 min-w-[120px] flex-1" placeholder="Colour" value={v.color} onChange={(e) => setV(i, 'color', e.target.value)} />
               <input type="color" className="h-10 w-11 cursor-pointer rounded-lg border border-plum-100 bg-white p-1" value={v.colorHex || '#999999'} onChange={(e) => setV(i, 'colorHex', e.target.value)} />
-              <input className="input !py-2" placeholder="Size" value={v.size} onChange={(e) => setV(i, 'size', e.target.value)} />
-              <input className="input !py-2" type="number" min="0" value={v.stock} onChange={(e) => setV(i, 'stock', e.target.value)} />
+              <input className="input !py-2 min-w-[100px] flex-1" placeholder="Size" value={v.size} onChange={(e) => setV(i, 'size', e.target.value)} />
+              <input className="input !py-2 w-24" type="number" min="0" value={v.stock} onChange={(e) => setV(i, 'stock', e.target.value)} />
               <button type="button" onClick={() => set('variants', f.variants.filter((_, j) => j !== i))} disabled={f.variants.length === 1} className="text-plum-300 hover:text-rose-500 disabled:opacity-30"><FiTrash2 /></button>
             </div>
           ))}

@@ -4,7 +4,8 @@
 
 @layer base {
   html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-  body { @apply font-body bg-white text-plum-950 antialiased; font-weight: 400; }
+  body { @apply font-body bg-white text-plum-950 antialiased; font-weight: 400; overflow-x: clip; }
+  button, a, input, select, textarea, label { touch-action: manipulation; }
   h1, h2, h3, h4 { @apply font-display; letter-spacing: -0.01em; }
   ::selection { background: #f9698f; color: #fff; }
   button, a { -webkit-tap-highlight-color: transparent; }
@@ -14,14 +15,14 @@
 
 @layer components {
   .container-x { @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10; }
-  .btn { @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-7 py-3.5 text-[13px] font-medium uppercase tracking-[.14em] transition-all duration-300 active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn { @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3.5 text-[12px] font-medium uppercase tracking-[.12em] sm:px-7 sm:text-[13px] sm:tracking-[.14em] transition-all duration-300 active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-50; }
   .btn-plum { @apply btn bg-plum-700 text-white shadow-soft hover:bg-plum-800 hover:shadow-lift; }
   .btn-rose { @apply btn bg-rose-500 text-white shadow-[0_12px_30px_-10px_rgba(236,72,118,.6)] hover:bg-rose-600; }
   .btn-outline { @apply btn border border-plum-700 text-plum-700 hover:bg-plum-700 hover:text-white; }
   .btn-white { @apply btn bg-white text-plum-800 hover:bg-plum-50; }
   .btn-sheen::after { content: ''; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); transform: translateX(-120%) skewX(-20deg); }
   .btn-sheen:hover::after { animation: sheen .9s ease; }
-  .input { @apply w-full rounded-xl border border-plum-100 bg-white px-4 py-3 text-[15px] text-plum-950 placeholder-plum-300 transition focus:border-rose-400 focus:shadow-glow focus:outline-none; }
+  .input { @apply w-full rounded-xl border border-plum-100 bg-white px-4 py-3 text-[16px] text-plum-950 sm:text-[15px] placeholder-plum-300 transition focus:border-rose-400 focus:shadow-glow focus:outline-none; }
   .label { @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-plum-700/70; }
   .chip { @apply inline-flex items-center gap-1.5 rounded-full border border-plum-100 bg-white px-4 py-2 text-sm text-plum-800 transition hover:border-plum-400; }
   .chip-on { @apply border-plum-700 bg-plum-700 text-white hover:border-plum-700; }

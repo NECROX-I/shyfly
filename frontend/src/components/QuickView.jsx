@@ -24,8 +24,8 @@ function Body({ p, close }) {
   }
 
   return (
-    <div className="grid max-h-[90vh] overflow-y-auto sm:grid-cols-2">
-      <div className="aspect-[4/5] bg-plum-50 sm:aspect-auto sm:min-h-[460px]"><ProductImage product={p} w={800} className="h-full w-full object-cover" /></div>
+    <div className="grid max-h-[90dvh] overflow-y-auto sm:grid-cols-2">
+      <div className="aspect-[4/3] bg-plum-50 sm:aspect-auto sm:min-h-[460px]"><ProductImage product={p} w={800} className="h-full w-full object-cover" /></div>
       <div className="flex flex-col p-6 sm:p-8">
         <p className="eyebrow">{p.subCategory?.name || p.category?.name}</p>
         <h2 className="mt-2 font-display text-4xl font-semibold leading-tight text-plum-800">{p.name}</h2>

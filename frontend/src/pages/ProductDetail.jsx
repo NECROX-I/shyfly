@@ -217,14 +217,14 @@ export default function ProductDetail() {
             <div ref={ctaRef}>
               {allSold ? <div className="rounded-2xl bg-plum-50 p-5 text-center font-medium text-plum-800">Sold out — <Link to={`/shop/${p.category?.slug}`} className="underline">see similar</Link></div> : (
                 <>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center rounded-full border border-plum-200">
                       <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-3.5" aria-label="Less"><FiMinus size={15} /></button>
                       <span className="w-8 text-center font-medium">{qty}</span>
                       <button onClick={() => setQty(Math.min(stockLeft ? Math.min(10, stockLeft) : 10, qty + 1))} className="p-3.5" aria-label="More"><FiPlus size={15} /></button>
                     </div>
-                    <button onClick={() => submit(false)} className={`btn-plum btn-sheen flex-1 ${added ? '!bg-green-600' : ''}`}>{added ? <><FiCheck size={16} /> Added</> : 'Add to bag'}</button>
-                    <button onClick={() => { const a = toggleWish(p._id); toast(a ? 'Added to wishlist 💗' : 'Removed from wishlist') }} aria-label="Wishlist" className="grid h-[50px] w-[50px] shrink-0 place-items-center rounded-full border border-plum-200 transition hover:border-rose-400">{wished ? <FaHeart className="text-rose-500" size={18} /> : <FiHeart size={19} />}</button>
+                    <button onClick={() => submit(false)} className={`btn-plum btn-sheen order-2 w-full sm:order-none sm:w-auto sm:flex-1 ${added ? '!bg-green-600' : ''}`}>{added ? <><FiCheck size={16} /> Added</> : 'Add to bag'}</button>
+                    <button onClick={() => { const a = toggleWish(p._id); toast(a ? 'Added to wishlist 💗' : 'Removed from wishlist') }} aria-label="Wishlist" className="order-1 ml-auto grid h-[50px] w-[50px] shrink-0 place-items-center sm:order-none sm:ml-0 rounded-full border border-plum-200 transition hover:border-rose-400">{wished ? <FaHeart className="text-rose-500" size={18} /> : <FiHeart size={19} />}</button>
                   </div>
                   <button onClick={() => submit(true)} className="btn-rose mt-3 w-full">Buy it now</button>
                   {stockLeft > 0 && stockLeft <= 5 && <p className="mt-3 text-sm font-medium text-rose-500">🔥 Only {stockLeft} left in stock</p>}
@@ -262,7 +262,7 @@ export default function ProductDetail() {
 
       <AnimatePresence>
         {stickyOn && !allSold && (
-          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-[58px] z-30 border-t border-plum-100 bg-white/95 p-3 backdrop-blur-xl lg:bottom-0">
+          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-[calc(58px+env(safe-area-inset-bottom,0px))] z-30 border-t border-plum-100 bg-white/95 p-3 backdrop-blur-xl lg:bottom-0">
             <div className="container-x flex items-center gap-4">
               <div className="hidden h-12 w-10 overflow-hidden rounded-lg sm:block"><ProductImage product={p} w={100} className="h-full w-full object-cover" /></div>
               <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{p.name}</p><p className="text-sm font-semibold text-plum-800">{inr(p.price)}</p></div>

@@ -23,7 +23,20 @@ export default function OrderTracker({ order, onCancel, phone, onReload }) {
       {cancelled ? (
         <p className="mt-6 flex items-center gap-2 rounded-2xl bg-rose-50 p-4 text-rose-700"><FiX /> This order was {order.status}. {order.payment.status === 'refund_pending' && 'Your refund is being processed.'}</p>
       ) : (
-        <div className="mt-8 overflow-x-auto pb-2"><ol className="flex min-w-[560px] justify-between">
+        <>
+        <ol className="mt-6 sm:hidden">
+          {STEPS.map((s, i) => {
+            const done = i <= idx
+            return (
+              <li key={s} className="relative flex gap-3 pb-5 last:pb-0">
+                {i < STEPS.length - 1 && <span className={`absolute left-[15px] top-8 h-full w-0.5 ${i < idx ? 'bg-rose-500' : 'bg-plum-100'}`} />}
+                <span className={`relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 text-xs ${done ? 'border-rose-500 bg-rose-500 text-white' : 'border-plum-100 bg-white text-plum-300'}`}>{done ? <FiCheck size={15} /> : i + 1}</span>
+                <div className="pt-1"><p className={`text-sm font-medium ${done ? 'text-plum-800' : 'text-plum-700/40'}`}>{STATUS_LABEL[s]}</p>{when(s) && <p className="text-xs text-plum-700/50">{fmtDate(when(s))}</p>}</div>
+              </li>
+            )
+          })}
+        </ol>
+        <div className="mt-8 hidden overflow-x-auto pb-2 sm:block"><ol className="flex min-w-[560px] justify-between">
           {STEPS.map((s, i) => {
             const done = i <= idx
             return (
@@ -36,6 +49,7 @@ export default function OrderTracker({ order, onCancel, phone, onReload }) {
             )
           })}
         </ol></div>
+        </>
       )}
 
       {order.eta?.from && !cancelled && order.status !== 'delivered' && <p className="mt-5 rounded-2xl bg-green-50 p-4 text-sm text-green-800">🚚 Expected delivery <b>{new Date(order.eta.from).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} – {new Date(order.eta.to).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</b></p>}

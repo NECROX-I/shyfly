@@ -30,7 +30,7 @@ export default function ReturnModal({ order, onClose, onDone }) {
   return (
     <AnimatePresence>
       <motion.div className="fixed inset-0 z-[70] flex items-end justify-center bg-plum-950/55 p-0 sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
-        <motion.form onSubmit={submit} onClick={(e) => e.stopPropagation()} initial={{ y: 60 }} animate={{ y: 0 }} className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-6 sm:rounded-3xl">
+        <motion.form onSubmit={submit} onClick={(e) => e.stopPropagation()} initial={{ y: 60 }} animate={{ y: 0 }} className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-6 sm:rounded-3xl">
           <div className="flex items-start justify-between"><div><h2 className="font-display text-4xl font-semibold text-plum-800">Return or exchange</h2><p className="text-sm text-plum-700/60">Order {order.orderNumber}</p></div><button type="button" onClick={onClose} aria-label="Close"><FiX size={24} /></button></div>
 
           <p className="label mt-5">What would you like?</p>

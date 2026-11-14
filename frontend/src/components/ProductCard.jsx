@@ -47,7 +47,7 @@ function ProductCard({ product: p, priority = false }) {
             {p.isNewArrival && !off && <span className="rounded-full bg-plum-700 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">New</span>}
           </div>
 
-          <button onClick={onWish} aria-label="Wishlist" className={`absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 shadow backdrop-blur transition hover:scale-110 ${pop ? 'animate-pop' : ''}`}>
+          <button onClick={onWish} aria-label="Wishlist" className={`absolute right-2.5 top-2.5 grid h-10 w-10 sm:right-3 sm:top-3 sm:h-9 sm:w-9 place-items-center rounded-full bg-white/90 shadow backdrop-blur transition hover:scale-110 ${pop ? 'animate-pop' : ''}`}>
             {wished ? <FaHeart className="text-rose-500" size={15} /> : <FiHeart className="text-plum-700" size={16} />}
           </button>
 

@@ -22,7 +22,7 @@ export default function Footer() {
   const col = 'space-y-2.5 text-[15px] text-plum-800/80 [&_a]:transition [&_a:hover]:text-rose-500'
 
   return (
-    <footer className="mt-24 bg-blush pb-24 lg:pb-0">
+    <footer className="mt-24 bg-blush pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
       <div className="container-x grid gap-12 py-16 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <img src="/logo-full.png" alt="Shyfly — For Every Woman, Every You" className="w-60" loading="lazy" />

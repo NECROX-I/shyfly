@@ -175,7 +175,7 @@ export default function Shop() {
         <aside className="hidden lg:block"><div className="sticky top-32 max-h-[calc(100vh-9rem)] overflow-y-auto pr-3 no-scrollbar"><FilterPanel facets={facets} params={params} set={set} cats={cats} category={subCat ? top : top} clear={clear} /></div></aside>
 
         <div>
-          <div className="sticky top-[62px] z-20 -mx-4 flex items-center justify-between gap-3 border-b border-plum-50 bg-white/90 px-4 py-3 backdrop-blur-xl sm:mx-0 sm:px-0 lg:top-[118px]">
+          <div className="sticky top-[56px] z-20 sm:top-[62px] -mx-4 flex items-center justify-between gap-3 border-b border-plum-50 bg-white/90 px-4 py-3 backdrop-blur-xl sm:mx-0 sm:px-0 lg:top-[118px]">
             <button onClick={() => setSheet(true)} className="chip lg:hidden"><FiSliders size={15} /> Filters{activeChips.length > 0 && <span className="grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-[10px] text-white">{activeChips.length}</span>}</button>
             <p className="hidden text-sm text-plum-700/70 lg:block">{loading ? 'Loading…' : <><b className="text-plum-900">{meta.total}</b> {meta.total === 1 ? 'product' : 'products'}</>}</p>
             <div className="ml-auto flex items-center gap-3">
@@ -222,7 +222,7 @@ export default function Shop() {
         {sheet && (
           <>
             <motion.div className="fixed inset-0 z-[55] bg-plum-950/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSheet(false)} />
-            <motion.div className="fixed inset-x-0 bottom-0 z-[56] flex max-h-[88vh] flex-col rounded-t-3xl bg-white" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'tween', duration: 0.3 }}>
+            <motion.div className="fixed inset-x-0 bottom-0 z-[56] flex max-h-[88dvh] flex-col rounded-t-3xl bg-white" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'tween', duration: 0.3 }}>
               <div className="flex items-center justify-between border-b border-plum-50 px-5 py-4"><h3 className="font-display text-3xl font-semibold text-plum-800">Filters</h3><button onClick={() => setSheet(false)} aria-label="Close"><FiX size={24} /></button></div>
               <div className="flex-1 overflow-y-auto px-5"><FilterPanel facets={facets} params={params} set={set} cats={cats} category={top} clear={clear} /></div>
               <div className="safe-b border-t border-plum-50 p-4"><button onClick={() => setSheet(false)} className="btn-plum w-full">Show {meta.total} products</button></div>

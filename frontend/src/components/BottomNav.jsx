@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { FiHome, FiGrid, FiHeart, FiShoppingBag, FiUser } from 'react-icons/fi'
 import { useCart, useWishlist, useUI, useAuth } from '../store'
 
@@ -7,6 +7,8 @@ export default function BottomNav() {
   const wish = useWishlist((s) => s.ids.length)
   const setCart = useUI((s) => s.setCart)
   const user = useAuth((s) => s.user)
+  const { pathname } = useLocation()
+  if (pathname.startsWith('/checkout')) return null   // checkout has its own sticky pay bar
   const item = ({ isActive }) => `relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium uppercase tracking-wider ${isActive ? 'text-rose-500' : 'text-plum-800/70'}`
   const dot = (n) => n > 0 && <span className="absolute right-[26%] top-1 grid h-4 min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[9px] text-white">{n}</span>
   return (

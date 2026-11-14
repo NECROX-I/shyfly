@@ -35,11 +35,11 @@ export default function Navbar() {
   return (
     <header className={`sticky top-0 z-40 bg-white/90 backdrop-blur-xl transition-shadow duration-300 ${scrolled ? 'shadow-[0_8px_30px_-12px_rgba(107,21,68,.25)]' : 'border-b border-plum-50'}`} onMouseLeave={leave}>
       <div className="container-x">
-        <div className={`flex items-center gap-4 transition-all duration-300 ${scrolled ? 'h-[62px]' : 'h-[76px]'}`}>
+        <div className={`flex items-center gap-4 transition-all duration-300 ${scrolled ? 'h-[56px] sm:h-[62px]' : 'h-[60px] sm:h-[76px]'}`}>
           <button className="-ml-2 p-2 lg:hidden" onClick={() => setMenu(true)} aria-label="Menu"><FiMenu size={24} /></button>
 
           <Link to="/" className="shrink-0" aria-label="Shyfly home">
-            <img src="/logo-mark.png" alt="Shyfly" className={`w-auto transition-all duration-300 ${scrolled ? 'h-10' : 'h-[52px]'}`} width="84" height="52" />
+            <img src="/logo-mark.png" alt="Shyfly" className={`w-auto transition-all duration-300 ${scrolled ? 'h-8 sm:h-10' : 'h-9 sm:h-[52px]'}`} width="84" height="52" />
           </Link>
 
           <button onClick={() => setSearch(true)} className="mx-auto hidden max-w-xl flex-1 items-center gap-3 rounded-full border border-plum-100 bg-blush px-5 py-2.5 text-left text-sm text-plum-700/60 transition hover:border-rose-300 hover:bg-white hover:shadow-soft md:flex">
@@ -47,12 +47,12 @@ export default function Navbar() {
           </button>
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2 md:ml-0">
-            <button onClick={() => setSearch(true)} className="p-2 md:hidden" aria-label="Search"><FiSearch size={22} /></button>
+            <button onClick={() => setSearch(true)} className="p-2.5 md:hidden" aria-label="Search"><FiSearch size={22} /></button>
             <Link to="/track" className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-[12px] uppercase tracking-[.16em] text-plum-800 transition hover:bg-plum-50 xl:flex"><FiTruck size={17} /> Track</Link>
             <Link to="/compare" className="relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Compare"><FiShuffle size={20} /><Badge n={cmpCount} /></Link>
             <Link to="/wishlist" className="relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Wishlist"><FiHeart size={21} /><Badge n={wishCount} /></Link>
             <Link to={user ? '/account' : '/login'} className="hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Account"><FiUser size={21} /></Link>
-            <button onClick={() => setCart(true)} className="relative p-2 transition hover:text-rose-500" aria-label="Bag"><FiShoppingBag size={22} /><Badge n={cartCount} /></button>
+            <button onClick={() => setCart(true)} className="relative p-2.5 transition hover:text-rose-500" aria-label="Bag"><FiShoppingBag size={22} /><Badge n={cartCount} /></button>
           </div>
         </div>
       </div>

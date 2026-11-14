@@ -60,14 +60,14 @@ export default function CartDrawer() {
                           <p className="mt-1 text-xs text-plum-700/60">{[i.color, i.size && `Size ${i.size}`].filter(Boolean).join(' · ')}</p>
                           <div className="mt-auto flex items-center justify-between">
                             <div className="flex items-center rounded-full border border-plum-100">
-                              <button onClick={() => setQty(i.key, i.qty - 1)} className="p-2 disabled:opacity-30" disabled={i.qty <= 1} aria-label="Less"><FiMinus size={14} /></button>
+                              <button onClick={() => setQty(i.key, i.qty - 1)} className="p-2.5 disabled:opacity-30" disabled={i.qty <= 1} aria-label="Less"><FiMinus size={14} /></button>
                               <span className="w-7 text-center text-sm font-medium">{i.qty}</span>
-                              <button onClick={() => setQty(i.key, i.qty + 1)} className="p-2 disabled:opacity-30" disabled={i.qty >= (i.max || 10)} aria-label="More"><FiPlus size={14} /></button>
+                              <button onClick={() => setQty(i.key, i.qty + 1)} className="p-2.5 disabled:opacity-30" disabled={i.qty >= (i.max || 10)} aria-label="More"><FiPlus size={14} /></button>
                             </div>
                             <p className="font-semibold text-plum-800">{inr(i.price * i.qty)}</p>
                           </div>
                         </div>
-                        <button onClick={() => remove(i.key)} className="self-start p-1 text-plum-300 transition hover:text-rose-500" aria-label="Remove"><FiTrash2 size={16} /></button>
+                        <button onClick={() => remove(i.key)} className="self-start p-2 text-plum-300 transition hover:text-rose-500" aria-label="Remove"><FiTrash2 size={16} /></button>
                       </motion.div>
                     ))}
                   </AnimatePresence>

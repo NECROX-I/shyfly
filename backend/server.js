@@ -33,6 +33,8 @@ if (process.env.NODE_ENV !== 'production') app.use(morgan('dev'));
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 600, standardHeaders: true, legacyHeaders: false, message: { success: false, message: 'Too many requests, slow down a little' } }));
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, message: { success: false, message: 'Too many login attempts, try again in a few minutes' } });
 
+app.get('/', (req, res) => res.json({ ok: true, name: 'Shyfly API', message: 'API is running. The store itself is on the frontend site.', health: '/health' }));
+
 app.get('/health', (req, res) => res.json({ ok: true, name: 'Shyfly API', time: new Date() }));
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/products', require('./routes/catalog'));

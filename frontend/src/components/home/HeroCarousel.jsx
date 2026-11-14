@@ -27,7 +27,7 @@ export default function HeroCarousel({ slides: raw = [] }) {
   if (!s) return null
 
   return (
-    <div ref={box} onMouseMove={onMove} onMouseLeave={() => { mx.set(0); my.set(0) }} className="group relative isolate h-full min-h-[440px] overflow-hidden rounded-[28px] text-white sm:min-h-[560px]">
+    <div ref={box} onMouseMove={onMove} onMouseLeave={() => { mx.set(0); my.set(0) }} className="group relative isolate h-full min-h-[620px] overflow-hidden rounded-[28px] text-white sm:min-h-[720px] md:min-h-[560px]">
       <AnimatePresence mode="sync">
         <motion.div key={i} className={`absolute inset-0 bg-gradient-to-br ${s.bg}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.9 }}
           drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.15} onDragEnd={(_, info) => { if (info.offset.x < -70) go(1); else if (info.offset.x > 70) go(-1) }}>
@@ -37,7 +37,7 @@ export default function HeroCarousel({ slides: raw = [] }) {
           <div className="container-x relative flex h-full max-w-none flex-col-reverse items-center justify-end gap-2 px-6 pb-14 pt-8 sm:px-12 md:flex-row md:justify-between">
             <div className="z-10 w-full max-w-lg text-center md:text-left">
               <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-[11px] font-medium uppercase tracking-[.38em] text-gold-300">{s.eyebrow}</motion.p>
-              <h1 className="mt-3 font-display text-[44px] font-semibold leading-[.98] sm:text-7xl">
+              <h1 className="mt-3 font-display text-[38px] font-semibold leading-[.98] sm:text-6xl md:text-7xl">
                 {s.title.map((line, k) => (
                   <span key={line} className="block overflow-hidden"><motion.span className={`block ${k === 1 ? 'italic text-rose-100' : ''}`} initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ delay: 0.25 + k * 0.12, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>{line}</motion.span></span>
                 ))}
@@ -48,7 +48,7 @@ export default function HeroCarousel({ slides: raw = [] }) {
               </motion.div>
             </div>
 
-            <div className="relative grid h-56 w-56 shrink-0 place-items-center sm:h-80 sm:w-80 md:h-[400px] md:w-[400px]">
+            <div className="relative grid h-44 w-44 shrink-0 place-items-center sm:h-72 sm:w-72 md:h-[400px] md:w-[400px]">
               <motion.div style={{ x: tx2, y: ty2 }} className="absolute inset-0 rounded-full border border-dashed border-white/30 [animation:spin_40s_linear_infinite]" />
               <motion.div style={{ x: tx1, y: ty1 }} className="absolute inset-5 grid place-items-center rounded-full bg-white/10 shadow-[inset_0_0_60px_rgba(255,255,255,.15)] backdrop-blur-sm sm:inset-8">
                 {s.image ? <img src={s.image} alt={s.title.join(' ')} className="h-full w-full rounded-full object-cover" /> : <div className="h-3/5 w-3/5 text-white drop-shadow-[0_10px_30px_rgba(0,0,0,.25)]"><ProductArt kind={s.kind} glyphOnly className="h-full w-full" /></div>}

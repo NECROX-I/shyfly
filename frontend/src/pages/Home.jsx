@@ -65,7 +65,7 @@ export default function Home() {
 
       <section className="container-x pt-3 sm:pt-5">
         <div className="grid gap-3 sm:gap-4 lg:grid-cols-12">
-          <div className="lg:col-span-7">{cfg.loaded ? <HeroCarousel key={cfg.content.heroSlides.length} slides={cfg.content.heroSlides} /> : <div className="skeleton h-full min-h-[440px] rounded-[28px] sm:min-h-[560px]" />}</div>
+          <div className="lg:col-span-7">{cfg.loaded ? <HeroCarousel key={cfg.content.heroSlides.length} slides={cfg.content.heroSlides} /> : <div className="skeleton h-full min-h-[620px] rounded-[28px] sm:min-h-[720px] md:min-h-[560px]" />}</div>
           <div className="lg:col-span-5">{cfg.loaded ? <PromoTiles tiles={cfg.content.promoTiles} /> : <div className="skeleton h-full min-h-[300px] rounded-[22px]" />}</div>
         </div>
       </section>

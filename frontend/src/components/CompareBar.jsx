@@ -9,7 +9,7 @@ export default function CompareBar() {
   return (
     <AnimatePresence>
       {items.length > 0 && (
-        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-16 z-30 px-3 lg:bottom-5">
+        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom,0px))] z-30 px-3 lg:bottom-5">
           <div className="mx-auto flex max-w-2xl items-center gap-3 rounded-full bg-plum-800 py-2 pl-3 pr-2 text-white shadow-lift">
             <div className="flex -space-x-2">
               {items.map((p) => (
