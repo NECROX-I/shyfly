@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout
+Disallow: /cart
+Disallow: /account
+Disallow: /order-success
+Disallow: /reset-password
+Disallow: /invoice
+
+Sitemap: https://shyflyfashion.com/sitemap.xml

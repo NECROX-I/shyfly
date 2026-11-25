@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { @apply font-body bg-white text-plum-950 antialiased; font-weight: 400; overflow-x: clip; }
+  button, a, input, select, textarea, label { touch-action: manipulation; }
+  h1, h2, h3, h4 { @apply font-display; letter-spacing: -0.01em; }
+  ::selection { background: #f9698f; color: #fff; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  img { @apply select-none; }
+  .grid > * { min-width: 0; }
+  :focus-visible { outline: 2px solid #ec4876; outline-offset: 2px; }
+}
+
+@layer components {
+  .container-x { @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10; }
+  .btn { @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3.5 text-[12px] font-medium uppercase tracking-[.12em] sm:px-7 sm:text-[13px] sm:tracking-[.14em] transition-all duration-300 active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-plum { @apply btn bg-plum-700 text-white shadow-soft hover:bg-plum-800 hover:shadow-lift; }
+  .btn-rose { @apply btn bg-rose-500 text-white shadow-[0_12px_30px_-10px_rgba(236,72,118,.6)] hover:bg-rose-600; }
+  .btn-outline { @apply btn border border-plum-700 text-plum-700 hover:bg-plum-700 hover:text-white; }
+  .btn-white { @apply btn bg-white text-plum-800 hover:bg-plum-50; }
+  /* compact call-to-action size (product page etc.): fixed 40px height, never oversized */
+  .btn-cta { @apply h-10 px-3 py-0 text-[11.5px] tracking-[.1em] sm:px-4 sm:text-[11.5px] sm:tracking-[.1em]; }
+  /* small label that appears under an icon on hover / keyboard focus (hover devices only) */
+  .tip::after { content: attr(data-tip); position: absolute; top: 100%; left: 50%; z-index: 60; margin-top: 2px; transform: translate(-50%, 4px); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s ease, transform .15s ease; border-radius: 6px; background: #2a0a1e; color: #fff; padding: 4px 9px; font-size: 11px; font-weight: 500; letter-spacing: .04em; box-shadow: 0 6px 18px -6px rgba(0,0,0,.4); }
+  .dark .tip::after { background: #fff; color: #2a0a1e; }
+  @media (hover: hover) { .tip:hover::after, .tip:focus-visible::after { opacity: 1; transform: translate(-50%, 0); } }
+  .btn-sheen::after { content: ''; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); transform: translateX(-120%) skewX(-20deg); }
+  .btn-sheen:hover::after { animation: sheen .9s ease; }
+  .input { @apply w-full rounded-xl border border-plum-100 bg-white px-4 py-3 text-[16px] text-plum-950 sm:text-[15px] placeholder-plum-300 transition focus:border-rose-400 focus:shadow-glow focus:outline-none; }
+  .label { @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-plum-700/70; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full border border-plum-100 bg-white px-4 py-2 text-sm text-plum-800 transition hover:border-plum-400; }
+  .chip-on { @apply border-plum-700 bg-plum-700 text-white hover:border-plum-700; }
+  .eyebrow { @apply text-[11px] font-medium uppercase tracking-[.32em] text-rose-500; }
+  .h-section { @apply font-display text-4xl font-semibold leading-[1.05] text-plum-800 sm:text-5xl; }
+  .skeleton { background: #f9eaf0; animation: skel 1.6s ease-in-out infinite; }
+  .card-lift { @apply transition-all duration-500 hover:-translate-y-1 hover:shadow-lift; }
+}
+
+@keyframes skel { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+
+@layer utilities {
+  .cv-auto { content-visibility: auto; contain-intrinsic-size: auto 700px; }
+  .spin-slow { animation: spin 40s linear infinite; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .text-shine { background: linear-gradient(100deg, #6b1544 20%, #ec4876 45%, #C9A24B 55%, #6b1544 80%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite; }
+  .bg-petal { background-image: radial-gradient(60% 50% at 15% 10%, rgba(255,199,217,.55), transparent 70%), radial-gradient(50% 50% at 90% 20%, rgba(235,210,138,.28), transparent 70%), radial-gradient(60% 60% at 70% 100%, rgba(249,105,143,.18), transparent 70%); }
+  .safe-b { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .perspective { perspective: 900px; }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #fff4f6; }
+::-webkit-scrollbar-thumb { background: #df93b3; border-radius: 999px; }
+
+/* range slider */
+input[type=range].dual { -webkit-appearance: none; appearance: none; background: transparent; pointer-events: none; position: absolute; width: 100%; height: 24px; top: 0; margin: 0; }
+input[type=range].dual::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; height: 22px; width: 22px; border-radius: 999px; background: #fff; border: 2px solid #6b1544; box-shadow: 0 2px 8px rgba(107,21,68,.3); cursor: grab; }
+input[type=range].dual::-moz-range-thumb { pointer-events: auto; height: 18px; width: 18px; border-radius: 999px; background: #fff; border: 2px solid #6b1544; cursor: grab; }
+
+/* ── Touch devices ─────────────────────────────────────────────
+   iOS Safari zooms the page when a field under 16px is focused → keep every field at 16px on touch screens. */
+@media (pointer: coarse) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]):not([type=hidden]),
+  select, textarea { font-size: 16px !important; }
+  /* text-style buttons/links ("Add slide", "Reset password"…) get a finger-sized hit area without changing how they look */
+  button.underline, a.underline { padding-block: .65rem; }
+}
+/* notched phones in landscape: keep content out of the cut-outs */
+.container-x { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+@media (min-width: 640px) { .container-x { padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); } }
+@media (min-width: 1024px) { .container-x { padding-left: 2.5rem; padding-right: 2.5rem; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* phones & tablets: keep only the cheap marquee running — decorative loops cost battery and frames */
+@media (max-width: 1023px) {
+  .animate-float, .animate-flutter, .animate-ping, .animate-pulse, .spin-slow { animation: none !important; }
+}
+.animate-marquee { will-change: transform; }
+
+
+/* ── Responsive helpers ────────────────────────────────────────
+   --header-h / --bnav-h are published at runtime (Navbar, BottomNav) with the REAL heights of the sticky header and the
+   phone tab bar, so anything that sticks under the header or floats above the tab bar always lines up on every screen. */
+html { scroll-padding-top: calc(var(--header-h, 0px) + 12px); }
+/* side panels (order summary, product gallery) only stick when the window is tall enough to show them whole —
+   otherwise their lower part could never be scrolled into view */
+@media (min-width: 1024px) and (min-height: 740px) { .stick-lg { position: sticky; top: calc(var(--header-h, 120px) + 1rem); } }
+@media (min-width: 768px) and (min-height: 700px) { .stick-md { position: sticky; top: calc(var(--header-h, 120px) + 1rem); align-self: start; } }
+/* landscape phones: ~100px of header + a 58px tab bar would eat half of a 375px-tall screen → header scrolls away, tab bar slims down */
+@media (max-height: 500px) and (orientation: landscape) and (max-width: 1023px) {
+  header.land-static { position: relative !important; }
+  .bnav > * { flex-direction: row !important; justify-content: center; gap: 6px !important; padding-block: 6px !important; }
+  .bnav svg { width: 18px; height: 18px; }
+  .bnav .bn-dot { position: static !important; margin-left: 2px; }
+}
+/* big touch screens (iPad landscape / Pro): there is no hover, so hover-only card controls give way to the tap button */
+@media (hover: none) and (min-width: 1024px) { .touch-show { display: grid !important; } .touch-hide { display: none !important; } }
+
+
+/* ───────── Shyfly dark mode ─────────
+   Activated by <html class="dark"> (see src/lib/theme.js). Loaded AFTER index.css so it wins ties.
+   Palette: bg #14090f · surface #1c0f17 · raised #26141f · line #3a2030 · text #fbe9f1 */
+
+.dark { color-scheme: dark; }
+.dark body { background-color: #14090f; color: #fbe9f1; }
+.dark ::selection { background: #c9608c; color: #fff; }
+.dark ::-webkit-scrollbar-track { background: #14090f; }
+.dark ::-webkit-scrollbar-thumb { background: #5a2d45; }
+.dark img { filter: brightness(.92); }
+/* logos are dark plum artwork: sit them on a soft light chip so they stay legible */
+.dark img[src$="logo-mark.png"], .dark img[src$="logo-full.png"] { filter: none; background: #fff4f6; border-radius: 14px; padding: 4px 8px; box-sizing: content-box; }
+.dark img[src$="logo-full.png"] { padding: 10px 14px; }
+.dark .bg-petal { opacity: .35; }
+
+.dark .bg-white { background-color:#1c0f17 }
+.dark .bg-white\/95, .dark .lg\:bg-white\/95 { background-color:rgba(28,15,23,.95) }
+.dark .bg-white\/90, .dark .lg\:bg-white\/90 { background-color:rgba(28,15,23,.9) }
+.dark .bg-white\/60, .dark .lg\:bg-white\/60 { background-color:rgba(28,15,23,.6) }
+.dark .bg-white\/50, .dark .lg\:bg-white\/50 { background-color:rgba(28,15,23,.5) }
+.dark .bg-blush { background-color:#26141f }
+.dark .bg-blush\/60 { background-color:rgba(38,20,31,.60) }
+.dark .bg-blush\/50 { background-color:rgba(38,20,31,.50) }
+.dark .bg-blush\/40 { background-color:rgba(38,20,31,.40) }
+.dark .bg-plum-50 { background-color:#26141f }
+.dark .bg-plum-100 { background-color:#3a2030 }
+.dark .bg-\[\#faf6f8\] { background-color:#14090f }
+.dark .skeleton { background:#2a1623 }
+.dark .hover\:bg-plum-50:hover { background-color:#2e1826 }
+.dark .hover\:bg-blush:hover, .dark .hover\:bg-white:hover { background-color:#2e1826 }
+.dark .hover\:bg-blush\/60:hover { background-color:#2e1826 }
+.dark .hover\:bg-blush\/50:hover { background-color:#2e1826 }
+.dark .hover\:bg-blush\/40:hover { background-color:#2e1826 }
+.dark .hover\:bg-rose-50:hover { background-color:rgba(236,72,118,.18) }
+.dark .bg-plum-700 { background-color:#a93a6a }
+.dark .hover\:bg-plum-700:hover { background-color:#a93a6a }
+.dark .btn-plum:hover, .dark .hover\:bg-plum-800:hover { background-color:#c9608c }
+.dark .text-plum-950 { color:#fbe9f1 }
+.dark .text-plum-900 { color:#fbe9f1 }
+.dark .text-plum-800 { color:#fbe9f1 }
+.dark .text-plum-900\/80, .dark .text-plum-800\/80 { color:rgba(251,233,241,.80) }
+.dark .text-plum-900\/75, .dark .text-plum-800\/75 { color:rgba(251,233,241,.75) }
+.dark .text-plum-900\/70, .dark .text-plum-800\/70 { color:rgba(251,233,241,.70) }
+.dark .text-plum-900\/60, .dark .text-plum-800\/60 { color:rgba(251,233,241,.60) }
+.dark .text-plum-700 { color:#f0b4cc }
+.dark .text-plum-700\/80 { color:rgba(240,180,204,.80) }
+.dark .text-plum-700\/70 { color:rgba(240,180,204,.70) }
+.dark .text-plum-700\/60 { color:rgba(240,180,204,.60) }
+.dark .text-plum-700\/55 { color:rgba(240,180,204,.55) }
+.dark .text-plum-700\/50 { color:rgba(240,180,204,.50) }
+.dark .text-plum-700\/45 { color:rgba(240,180,204,.45) }
+.dark .text-plum-700\/40 { color:rgba(240,180,204,.40) }
+.dark .text-rose-600, .dark .hover\:text-rose-600:hover { color:#f9698f }
+.dark .text-rose-700 { color:#ffc7d9 }
+.dark .border-plum-50, .dark .border-plum-100 { border-color:#3a2030 }
+.dark .border-plum-200 { border-color:#4d2a3f }
+.dark .border-plum-300 { border-color:#6b3a55 }
+.dark .border-plum-700, .dark .border-plum-800, .dark .hover\:border-plum-700:hover { border-color:#c9608c }
+.dark .hover\:border-plum-300:hover, .dark .hover\:border-plum-400:hover, .dark .hover\:border-plum-500:hover { border-color:#c9608c }
+.dark .ring-plum-100 { --tw-ring-color:#3a2030 }
+.dark .ring-plum-700, .dark .hover\:ring-plum-400:hover { --tw-ring-color:#c9608c }
+.dark .divide-plum-50 > :not([hidden]) ~ :not([hidden]), .dark .divide-plum-100 > :not([hidden]) ~ :not([hidden]) { border-color:#3a2030 }
+.dark .accent-plum-700 { accent-color:#ec4876 }
+.dark .bg-green-50 { background-color:rgba(34,197,94,.14) }
+.dark .bg-amber-50 { background-color:rgba(245,158,11,.14) }
+.dark .bg-blue-50 { background-color:rgba(59,130,246,.16) }
+.dark .bg-rose-50 { background-color:rgba(236,72,118,.14) }
+.dark .text-green-700, .dark .text-green-800 { color:#86efac }
+.dark .text-green-600 { color:#4ade80 }
+.dark .text-amber-700, .dark .text-amber-800 { color:#fcd34d }
+.dark .text-amber-600 { color:#fbbf24 }
+.dark .text-blue-700 { color:#93c5fd }
+
+/* components (defined with @apply in index.css, so mapped explicitly) */
+.dark .btn-plum { background-color: #a93a6a; color: #fff; }
+.dark .btn-plum:hover { background-color: #c9608c; }
+.dark .group .blur-xl.bg-white\/50 { display: none; }
+.dark .input { background-color: #1c0f17; border-color: #3a2030; color: #fbe9f1; }
+.dark .input::placeholder { color: #8a5a73; }
+.dark .input:focus { border-color: #f9698f; }
+.dark .label { color: rgba(240,180,204,.75); }
+.dark .chip { background-color: #1c0f17; border-color: #3a2030; color: #f6e0ea; }
+.dark .chip:hover { border-color: #c9608c; }
+.dark .chip-on, .dark .chip-on:hover { background-color: #a93a6a; border-color: #a93a6a; color: #fff; }
+.dark .h-section { color: #fbe9f1; }
+.dark .btn-outline { border-color: #c9608c; color: #f0b4cc; }
+.dark .btn-outline:hover { background-color: #a93a6a; border-color: #a93a6a; color: #fff; }
+.dark .btn-white { background-color: #fff; color: #561138; }
+.dark .btn-white:hover { background-color: #fbf1f6; }
+.dark .text-shine { background-image: linear-gradient(100deg, #f6e0ea 20%, #ec4876 45%, #EBD28A 55%, #f6e0ea 80%); background-size: 200% auto; }
+.dark input[type=range].dual::-webkit-slider-thumb { background: #1c0f17; border-color: #c9608c; }
+.dark input[type=range].dual::-moz-range-thumb { background: #1c0f17; border-color: #c9608c; }
+.dark input, .dark select, .dark textarea { color-scheme: dark; }
+.dark input:-webkit-autofill { -webkit-box-shadow: 0 0 0 40px #1c0f17 inset; -webkit-text-fill-color: #fbe9f1; }
+
+/* shadows read as glow on dark — soften & neutralise */
+.dark .shadow-soft { --tw-shadow: 0 10px 40px -12px rgba(0,0,0,.6); --tw-shadow-colored: 0 10px 40px -12px var(--tw-shadow-color); }
+.dark .shadow-lift, .dark .hover\:shadow-lift:hover { --tw-shadow: 0 22px 60px -18px rgba(0,0,0,.75); --tw-shadow-colored: 0 22px 60px -18px var(--tw-shadow-color); }
+
+.dark .bg-plum-800 { background-color: #561138; }
+
+/* toast */
+.dark .shyfly-toast { background: #2a1623 !important; border: 1px solid #4d2a3f; }
+
+/* admin dashboard chart (recharts) */
+.dark .recharts-cartesian-grid line { stroke: #3a2030; }
+.dark .recharts-text { fill: #d9a5bd; }
+.dark .recharts-default-tooltip { background-color: #1c0f17 !important; border-color: #3a2030 !important; }
+.dark .recharts-tooltip-label, .dark .recharts-tooltip-item { color: #fbe9f1 !important; }

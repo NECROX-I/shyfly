@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en-IN">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#6b1544" />
+        <!-- Static copies for crawlers/link-previews that do not run JavaScript. React (components/SEO.jsx) replaces them per page. -->
+        <meta data-static-seo name="description" content="Shyfly Fashion – For Every Woman, Every You. Shop jewellery, clothing, footwear, handbags &amp; accessories online with free shipping, Cash on Delivery &amp; easy returns." />
+        <meta data-static-seo property="og:site_name" content="Shyfly Fashion" />
+        <meta data-static-seo property="og:locale" content="en_IN" />
+        <meta data-static-seo property="og:type" content="website" />
+        <meta data-static-seo property="og:title" content="Shyfly Fashion – Women’s Jewellery, Clothing &amp; Footwear Online" />
+        <meta data-static-seo property="og:description" content="Shop jewellery, clothing, footwear, handbags &amp; accessories online with free shipping, Cash on Delivery &amp; easy returns." />
+        <meta data-static-seo property="og:url" content="https://shyflyfashion.com/" />
+        <meta data-static-seo property="og:image" content="https://shyflyfashion.com/logo-full.png" />
+        <meta data-static-seo name="twitter:card" content="summary_large_image" />
+        <link data-static-seo rel="canonical" href="https://shyflyfashion.com/" />
+        <script type="application/ld+json">
+            {"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://shyflyfashion.com/#organization","name":"Shyfly Fashion","alternateName":["Shyfly","Shyfly Fashion"],"url":"https://shyflyfashion.com/","logo":"https://shyflyfashion.com/icon-512.png","slogan":"For Every Woman, Every You"},{"@type":"WebSite","@id":"https://shyflyfashion.com/#website","url":"https://shyflyfashion.com/","name":"Shyfly Fashion","alternateName":"Shyfly","inLanguage":"en-IN","publisher":{"@id":"https://shyflyfashion.com/#organization"},"potentialAction":{"@type":"SearchAction","target":"https://shyflyfashion.com/shop?q={search_term_string}","query-input":"required name=search_term_string"}}]}
+        </script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap"
+            rel="stylesheet"
+        />
+        <script>
+            (function () {
+                try {
+                    var t = localStorage.getItem("shyfly-theme");
+                    var dark = t
+                        ? t === "dark"
+                        : window.matchMedia("(prefers-color-scheme: dark)")
+                              .matches;
+                    if (dark) {
+                        document.documentElement.classList.add("dark");
+                        document.documentElement.style.colorScheme = "dark";
+                        document
+                            .querySelector('meta[name="theme-color"]')
+                            .setAttribute("content", "#14090f");
+                    }
+                } catch (e) {}
+            })();
+        </script>
+        <title>Shyfly Fashion – Women’s Jewellery, Clothing &amp; Footwear Online</title>
+    </head>
+    <body>
+        <div id="root"></div>
+        <noscript>
+            <h1>Shyfly Fashion – For Every Woman, Every You</h1>
+            <p>Shop women’s jewellery, clothing, footwear, handbags, eyewear and accessories online at Shyfly Fashion. Free shipping, Cash on Delivery and easy returns. Please enable JavaScript to browse the store.</p>
+            <nav>
+                <a href="/shop">Shop all</a> · <a href="/shop?isNew=true">New arrivals</a> · <a href="/shop?sale=true">Sale</a> · <a href="/about">Our story</a> · <a href="/contact">Contact</a> · <a href="/track">Track order</a>
+            </nav>
+        </noscript>
+        <script type="module" src="/src/main.jsx"></script>
+    </body>
+</html>

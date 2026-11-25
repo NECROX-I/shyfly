@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "https://shyfly.onrender.com/sitemap.xml" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

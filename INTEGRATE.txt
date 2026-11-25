@@ -1,0 +1,8 @@
+Shyfly - SEO (rank for "Shyfly Fashion")  — apply AFTER shyfly-responsive-final.zip (a few files overlap and these are the newer versions)
+
+1. Unzip over your repo root (overwrites the files, adds frontend/src/lib/site.js and backend/routes/sitemap.js).
+2. Render: set CLIENT_URL=https://shyflyfashion.com,https://www.shyflyfashion.com,https://shyfly.in,https://www.shyfly.in,https://shyfly.vercel.app
+   and SITE_URL=https://shyflyfashion.com  -> redeploy backend. (Without the new domain in CLIENT_URL the site gets CORS errors.)
+3. cd frontend && npm run build, then commit + push (Vercel redeploys).
+4. Check: https://shyflyfashion.com/sitemap.xml shows XML, https://shyflyfashion.com/robots.txt lists the Sitemap.
+5. Then do the Google Search Console steps from the chat message.
