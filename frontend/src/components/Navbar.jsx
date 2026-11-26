@@ -3,13 +3,16 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FiHeart, FiShoppingBag, FiUser, FiMenu, FiX, FiChevronDown, FiTruck, FiShuffle, FiArrowRight } from 'react-icons/fi'
 import { useCart, useWishlist, useCompare, useAuth, useUI } from '../store'
-import { useCategories, useCssVarHeight, useLockBody } from '../lib/hooks'
+import { useCategories, useLockBody } from '../lib/hooks'
 import { ProductArt } from '../lib/art'
 import ThemeToggle from './ThemeToggle'
 import SearchBox from './SearchBox'
 import { img } from '../lib/format'
 
 const Badge = ({ n }) => (n > 0 ? <span key={n} className="absolute -right-1.5 -top-1.5 grid h-[18px] min-w-[18px] animate-pop place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold text-white">{n > 99 ? '99+' : n}</span> : null)
+
+// 🍬 candy balance shown next to the theme toggle (phones/tablets) — 12,500 → "12.5k" so it never crowds the bar
+const candyLabel = (n) => (n >= 10000 ? `${(n / 1000).toFixed(n >= 100000 ? 0 : 1).replace(/\.0$/, '')}k` : n.toLocaleString('en-IN'))
 
 // label of a desktop nav entry (categories carry the dropdown chevron)
 const NavLabel = ({ i, open = false }) => i.cat
@@ -25,19 +28,46 @@ export default function Navbar() {
   const cmpCount = useCompare((s) => s.items.length)
   const user = useAuth((s) => s.user)
   const { setCart, menuOpen, setMenu } = useUI()
-  const [scrolled, setScrolled] = useState(false)
+  const [stuck, setStuck] = useState(false)   // true while the pinned bar is actually stuck to the top (→ shadow)
   const [hover, setHover] = useState(null)
   const [openAcc, setOpenAcc] = useState(null)
   const timer = useRef()
-  const header = useRef(null)
+  const bar = useRef(null)      // top bar: pinned on phones/tablets, scrolls away on desktop
+  const navEl = useRef(null)    // category row: the only part that stays pinned on desktop
   const row = useRef(null)
   const ruler = useRef(null)
   const [hiddenKeys, setHiddenKeys] = useState([])   // desktop nav items that don't fit → tucked into “More”
   const [moreOpen, setMoreOpen] = useState(false)
   useLockBody(menuOpen)
-  useCssVarHeight(header, '--header-h')
 
-  useEffect(() => { const h = () => setScrolled(window.scrollY > 60); h(); window.addEventListener('scroll', h, { passive: true }); return () => window.removeEventListener('scroll', h) }, [])
+  // The search row (phones) / the logo+search row (desktop) is NOT sticky: it scrolls away with the page.
+  // Only the slim bar (phones: menu·logo·bag, desktop: category row) stays pinned. --header-h = height of whatever is pinned,
+  // so the Shop filter bar, side panels etc. tuck in right under it.
+  useEffect(() => {
+    const root = document.documentElement
+    const pinnedH = (el) => {
+      if (!el) return 0
+      const cs = getComputedStyle(el)
+      return cs.display !== 'none' && (cs.position === 'sticky' || cs.position === 'fixed') ? Math.round(el.getBoundingClientRect().height) : 0
+    }
+    let raf = 0
+    const sync = () => {
+      root.style.setProperty('--header-h', `${pinnedH(bar.current) + pinnedH(navEl.current)}px`)
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const el = [bar.current, navEl.current].find((e) => e && getComputedStyle(e).display !== 'none' && getComputedStyle(e).position === 'sticky')
+        setStuck(!!el && window.scrollY > 0 && el.getBoundingClientRect().top <= 0.5)
+      })
+    }
+    sync()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(sync) : null
+    if (bar.current) ro?.observe(bar.current)
+    if (navEl.current) ro?.observe(navEl.current)
+    window.addEventListener('scroll', sync, { passive: true })
+    window.addEventListener('resize', sync)
+    window.addEventListener('orientationchange', sync)
+    return () => { cancelAnimationFrame(raf); ro?.disconnect(); window.removeEventListener('scroll', sync); window.removeEventListener('resize', sync); window.removeEventListener('orientationchange', sync); root.style.removeProperty('--header-h') }
+  }, [])
   useEffect(() => { setMenu(false); setHover(null); setMoreOpen(false) }, [loc.pathname])
   useEffect(() => {
     const h = (e) => {
@@ -95,33 +125,49 @@ export default function Navbar() {
 
   const link = 'relative block whitespace-nowrap py-3 text-[11.5px] font-medium uppercase tracking-[.1em] xl:text-[12.5px] xl:tracking-[.2em] text-plum-800 transition hover:text-rose-500 after:absolute after:inset-x-0 after:bottom-1.5 after:h-px after:origin-left after:scale-x-0 after:bg-rose-500 after:transition hover:after:scale-x-100'
 
+  const shadow = 'shadow-[0_8px_30px_-12px_rgba(107,21,68,.25)]'
+  const onCheckout = loc.pathname.startsWith('/checkout')
+
   return (
-    <header ref={header} className={`land-static sticky top-0 z-40 bg-white lg:bg-white/90 lg:backdrop-blur-xl transition-shadow duration-300 ${scrolled ? 'shadow-[0_8px_30px_-12px_rgba(107,21,68,.25)]' : 'border-b border-plum-50'}`} onMouseLeave={leave}>
-      <div className="container-x">
-        <div className={`flex items-center gap-4 transition-all duration-300 h-[60px] sm:h-[68px] ${scrolled ? 'lg:h-[62px]' : 'lg:h-[76px]'}`}>
-          <button className="-ml-2 p-2 lg:hidden" onClick={() => setMenu(true)} aria-label="Menu"><FiMenu size={24} /></button>
+    <>
+      {/* top bar — pinned on phones/tablets; on desktop it scrolls away (the category row below stays pinned) */}
+      <header ref={bar} className={`land-static sticky top-0 z-40 bg-white transition-shadow duration-300 lg:static lg:z-auto ${stuck ? `${shadow} lg:shadow-none` : ''} ${onCheckout ? 'border-b border-plum-50 lg:border-b-0' : ''}`}>
+        <div className="container-x">
+          <div className="flex h-[60px] items-center gap-4 sm:h-[68px] lg:h-[76px]">
+            <button className="-ml-2 p-2 lg:hidden" onClick={() => setMenu(true)} aria-label="Menu"><FiMenu size={24} /></button>
 
-          <Link to="/" className="shrink-0" aria-label="Shyfly home">
-            <img src="/logo-mark.png" alt="Shyfly Fashion" className={`w-auto transition-all duration-300 h-9 sm:h-11 ${scrolled ? 'lg:h-10' : 'lg:h-[52px]'}`} width="84" height="52" />
-          </Link>
+            <Link to="/" className="shrink-0" aria-label="Shyfly home">
+              <img src="/logo-mark.png" alt="Shyfly Fashion" className="h-9 w-auto sm:h-11 lg:h-[52px]" width="84" height="52" />
+            </Link>
 
-          <SearchBox id="search-desktop" className="mx-auto hidden max-w-xl flex-1 lg:block" />
+            <SearchBox id="search-desktop" className="mx-auto hidden max-w-xl flex-1 lg:block" />
 
-          <div className="ml-auto flex items-center gap-1 sm:gap-2 lg:ml-0">
-            <Link to="/track" className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-[12px] uppercase tracking-[.16em] text-plum-800 transition hover:bg-plum-50 xl:flex"><FiTruck size={17} /> Track</Link>
-            <ThemeToggle className="p-2.5 transition hover:text-rose-500" />
-            <Link to="/compare" data-tip="Compare" className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Compare"><FiShuffle size={20} /><Badge n={cmpCount} /></Link>
-            <Link to="/wishlist" data-tip="Wishlist" className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Wishlist"><FiHeart size={21} /><Badge n={wishCount} /></Link>
-            <Link to={user ? '/account' : '/login'} data-tip={user ? `Hi, ${(user.name || 'Me').split(' ')[0]}` : 'Login'} className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Account"><FiUser size={21} /></Link>
-            <button onClick={() => setCart(true)} data-tip="Bag" className="tip relative p-2.5 transition hover:text-rose-500" aria-label="Bag"><FiShoppingBag size={22} /><Badge n={cartCount} /></button>
+            <div className="ml-auto flex items-center gap-1 sm:gap-2 lg:ml-0">
+              <Link to="/track" className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-[12px] uppercase tracking-[.16em] text-plum-800 transition hover:bg-plum-50 xl:flex"><FiTruck size={17} /> Track</Link>
+              {typeof user?.candies === 'number' && (
+                <Link key={user.candies} to="/account?tab=candy" aria-label={`${user.candies} candies — open My Candy`} className="inline-flex h-8 shrink-0 animate-pop items-center gap-0.5 rounded-full bg-blush px-2 text-[13px] min-[360px]:gap-1 min-[360px]:px-2.5 font-semibold tabular-nums text-plum-800 transition hover:text-rose-500 lg:hidden">
+                  <span aria-hidden="true" className="text-[15px] leading-none">🍬</span>{candyLabel(user.candies)}
+                </Link>
+              )}
+              <ThemeToggle className="p-2.5 transition hover:text-rose-500" />
+              <Link to="/compare" data-tip="Compare" className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Compare"><FiShuffle size={20} /><Badge n={cmpCount} /></Link>
+              <Link to="/wishlist" data-tip="Wishlist" className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Wishlist"><FiHeart size={21} /><Badge n={wishCount} /></Link>
+              <Link to={user ? '/account' : '/login'} data-tip={user ? `Hi, ${(user.name || 'Me').split(' ')[0]}` : 'Login'} className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Account"><FiUser size={21} /></Link>
+              <button onClick={() => setCart(true)} data-tip="Bag" className="tip relative p-2.5 transition hover:text-rose-500" aria-label="Bag"><FiShoppingBag size={22} /><Badge n={cartCount} /></button>
+            </div>
           </div>
         </div>
-        {/* phones: Amazon-style search row that stays under the top bar */}
-        {!loc.pathname.startsWith('/checkout') && <div className="pb-2.5 lg:hidden"><SearchBox id="search-mobile" /></div>}
-      </div>
+      </header>
+
+      {/* phones/tablets: search row — NOT sticky, scrolls away and slides under the pinned top bar (z below it so the dropdown never paints over the bar) */}
+      {!onCheckout && (
+        <div className="relative z-[39] border-b border-plum-50 bg-white lg:hidden">
+          <div className="container-x pb-2.5"><SearchBox id="search-mobile" /></div>
+        </div>
+      )}
 
       {/* desktop category row */}
-      <nav className="relative hidden border-t border-plum-50 lg:block">
+      <nav ref={navEl} aria-label="Main" onMouseLeave={leave} className={`sticky top-0 z-40 hidden bg-white/90 backdrop-blur-xl transition-shadow duration-300 lg:block ${stuck ? `border-t border-plum-50 ${shadow}` : 'border-y border-plum-50'}`}>
         {/* invisible ruler: measures every item once so we know how many fit */}
         <div ref={ruler} aria-hidden="true" className="pointer-events-none invisible absolute left-0 top-0 -z-10 flex h-0 w-max gap-4 overflow-hidden whitespace-nowrap xl:gap-7 2xl:gap-9 [&>*]:shrink-0">
           {navItems.map((i) => <span key={i.k} data-k={i.k} className={link}><NavLabel i={i} /></span>)}
@@ -150,7 +196,6 @@ export default function Navbar() {
             </div>
           )}
         </div>
-      </nav>
 
       {/* mega menu */}
       <AnimatePresence>
@@ -184,6 +229,7 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      </nav>
 
       {/* mobile drawer */}
       <AnimatePresence>
@@ -222,6 +268,6 @@ export default function Navbar() {
           </>
         )}
       </AnimatePresence>
-    </header>
+    </>
   )
 }
