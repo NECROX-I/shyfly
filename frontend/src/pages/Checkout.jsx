@@ -120,8 +120,8 @@ const Row = ({ l, children, green, extra }) => (
 )
 const KnowMore = ({ onClick }) => <button type="button" onClick={onClick} className="-my-1.5 py-1.5 text-xs font-bold text-rose-500">Know more</button>
 
-function PriceDetails({ count, mrpTotal, mrpDiscount, discount, shipping, shippingFee, total, onCoupon, onShipInfo }) {
-  const saved = mrpDiscount + discount
+function PriceDetails({ count, mrpTotal, mrpDiscount, discount, candy = 0, shipping, shippingFee, total, onCoupon, onShipInfo }) {
+  const saved = mrpDiscount + discount + candy
   return (
     <div>
       <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-plum-700/70">Price details ({count} item{count === 1 ? '' : 's'})</h3>
@@ -130,6 +130,7 @@ function PriceDetails({ count, mrpTotal, mrpDiscount, discount, shipping, shippi
       {discount > 0
         ? <Row l="Coupon discount" green>− {inr(discount)}</Row>
         : onCoupon && <Row l="Coupon discount"><button type="button" onClick={onCoupon} className="-my-1.5 py-1.5 font-bold text-rose-500">Apply coupon</button></Row>}
+      {candy > 0 && <Row l="Candy redeemed 🍬" green>− {inr(candy)}</Row>}
       <Row l="Shipping fee" extra={onShipInfo && <KnowMore onClick={onShipInfo} />}>{shipping ? inr(shipping) : <><s className="mr-2 text-plum-700/50">{inr(shippingFee)}</s><b className="text-green-700">FREE</b></>}</Row>
       <div className="mt-2 flex items-center justify-between border-t border-dashed border-plum-200 pt-3 text-base font-bold text-plum-800"><span>Total amount</span><span>{inr(total)}</span></div>
       {saved > 0 && <p className="mt-4 rounded bg-green-50 p-3 text-sm font-medium text-green-800">🎉 You will save {inr(saved)} on this order</p>}
@@ -497,6 +498,7 @@ export default function Checkout() {
   const [showAllOffers, setShowAllOffers] = useState(false)
   const [busy, setBusy] = useState(false)
   const [placed, setPlaced] = useState(false)
+  const [useCandy, setUseCandy] = useState(false) // 🍬 pay part of the order with candies (1 candy = ₹1)
   const close = () => setDlg(null)
 
   // ── derived money ──
@@ -507,7 +509,11 @@ export default function Checkout() {
   const discount = coupon?.discount || 0
   const after = subtotal - discount
   const shipping = sel.length && after < cfg.freeShippingMin ? cfg.shippingFee : 0
-  const total = after + shipping
+  const candyBal = Math.max(0, Math.floor(user?.candies || 0))
+  const maxPct = cfg.candy?.maxRedeemPercent ?? 50
+  const candyAvail = sel.length ? Math.max(0, Math.min(candyBal, Math.floor((after * maxPct) / 100))) : 0
+  const candyUsed = step === 'payment' && useCandy ? candyAvail : 0
+  const total = after + shipping - candyUsed
 
   // ── addresses ──
   const saved = user?.addresses || []
@@ -626,6 +632,7 @@ export default function Checkout() {
         paymentMethod: method === 'cod' ? 'cod' : 'razorpay',
         couponCode: coupon?.code,
         notes: note,
+        useCandies: candyUsed > 0,
       })
       if (method === 'cod') return finish(data.order)
       await loadRazorpay()
@@ -648,7 +655,7 @@ export default function Checkout() {
       })
       rz.on('payment.failed', (r) => toast.error(r.error?.description || 'Payment failed, please try again'))
       rz.open()
-    } catch (err) { toast.error(errMsg(err)); setBusy(false) }
+    } catch (err) { toast.error(errMsg(err)); setBusy(false); if (candyUsed > 0) authAPI.me().then((r) => setUser(r.data.user)).catch(() => {}) }
   }
 
   // ── guards (after all hooks) ──
@@ -842,6 +849,16 @@ export default function Checkout() {
                 </div>
               </div>
 
+              {candyBal > 0 && (
+                <label className={`flex items-start gap-3 rounded border p-4 text-sm ${candyAvail > 0 ? 'cursor-pointer border-plum-100 bg-white' : 'border-plum-100 bg-plum-50/50 opacity-70'}`}>
+                  <input type="checkbox" checked={useCandy && candyAvail > 0} disabled={candyAvail <= 0} onChange={(e) => setUseCandy(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-rose-500" />
+                  <span className="min-w-0">
+                    <b className="text-plum-900">🍬 Use {candyAvail} candies (= {inr(candyAvail)} off)</b>
+                    <span className="mt-0.5 block text-xs text-plum-700/70">You have {candyBal} candies · 1 candy = ₹1 · up to {maxPct}% of the order can be paid with candies</span>
+                  </span>
+                </label>
+              )}
+
               <details className="rounded border border-plum-100 bg-white p-4 text-sm">
                 <summary className="cursor-pointer font-medium text-plum-800">Add a gift message or delivery instruction (optional)</summary>
                 <textarea rows={2} className="input mt-3 !rounded" value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} placeholder="Gift message, delivery instructions…" />
@@ -873,7 +890,7 @@ export default function Checkout() {
           )}
 
           <div className="rounded border border-plum-100 bg-white p-5">
-            <PriceDetails count={sel.reduce((s, i) => s + i.qty, 0)} mrpTotal={mrpTotal} mrpDiscount={mrpDiscount} discount={discount} shipping={shipping} shippingFee={cfg.shippingFee} total={total}
+            <PriceDetails count={sel.reduce((s, i) => s + i.qty, 0)} mrpTotal={mrpTotal} mrpDiscount={mrpDiscount} discount={discount} candy={candyUsed} shipping={shipping} shippingFee={cfg.shippingFee} total={total}
               onCoupon={step === 'bag' && !coupon ? () => setDlg({ type: 'coupon' }) : undefined} onShipInfo={() => setDlg({ type: 'shipInfo' })} />
             {/* desktop only — phones use the sticky bar below */}
             <PrimaryBtn onClick={cta.run} disabled={ctaOff} className="mt-5 w-full max-lg:hidden">

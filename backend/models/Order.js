@@ -64,6 +64,8 @@ const orderSchema = new mongoose.Schema(
     couponCode: String,
     shipping: { type: Number, default: 0 },
     codFee: { type: Number, default: 0 },
+    candyUsed: { type: Number, default: 0 }, // 🍬 candies redeemed (1 = ₹1), already deducted from total
+    candyRefunded: { type: Boolean, default: false },
     total: { type: Number, required: true },
     payment: {
       method: { type: String, enum: ["cod", "razorpay"], required: true },

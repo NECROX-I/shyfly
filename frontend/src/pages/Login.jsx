@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import toast from "react-hot-toast";
 import SEO from "../components/SEO";
 import { authAPI } from "../services/api";
@@ -11,8 +17,10 @@ export default function Login() {
   const nav = useNavigate();
   const { state } = useLocation();
   const { user, login } = useAuth();
+  const [qs] = useSearchParams();
+  const refFromLink = (qs.get("ref") || "").trim().toUpperCase().slice(0, 20);
   const [mode, setMode] = useState(
-    state?.mode === "register" ? "register" : "login",
+    state?.mode === "register" || refFromLink ? "register" : "login",
   );
   const [f, setF] = useState({
     name: "",
@@ -20,6 +28,7 @@ export default function Login() {
     phone: "",
     password: "",
     id: "",
+    ref: refFromLink, // 🍬 friend's referral code (from ?ref=CODE link or typed)
   });
   const [busy, setBusy] = useState(false);
   if (user) return <Navigate to={state?.from || "/account"} replace />;
@@ -40,10 +49,12 @@ export default function Login() {
               email: f.email,
               phone: f.phone,
               password: f.password,
+              referralCode: f.ref.trim() || undefined,
             });
       login(r.data.user, r.data.token);
       toast.success(
-        `Welcome${r.data.user.name ? ", " + r.data.user.name.split(" ")[0] : ""} 💗`,
+        `Welcome${r.data.user.name ? ", " + r.data.user.name.split(" ")[0] : ""} 💗` +
+          (r.data.candyBonus ? `  +${r.data.candyBonus} candies 🍬` : ""),
       );
       nav(state?.from || "/account", { replace: true });
     } catch (err) {
@@ -71,6 +82,12 @@ export default function Login() {
         <h1 className="font-display text-5xl font-semibold text-plum-800">
           {mode === "login" ? "Welcome back" : "Create account"}
         </h1>
+        {mode === "register" && (
+          <p className="mt-4 rounded-2xl bg-blush px-4 py-3 text-sm text-plum-800">
+            🍬 Get <b>200 candies</b> free when you sign up. Joining with a
+            friend&apos;s code? You both get <b>100</b>. 1 candy = ₹1.
+          </p>
+        )}
         {state?.reason === "checkout" && (
           <p className="mt-4 rounded-2xl bg-blush px-4 py-3 text-sm text-plum-800">
             Please {mode === "login" ? "log in" : "sign up"} to place your
@@ -147,6 +164,24 @@ export default function Login() {
               }
             />
           </div>
+          {mode === "register" && (
+            <div>
+              <label className="label">Referral code (optional)</label>
+              <input
+                className="input uppercase"
+                placeholder="e.g. SHYK3M9QX"
+                value={f.ref}
+                onChange={(e) =>
+                  setF({
+                    ...f,
+                    ref: e.target.value.replace(/\s/g, "").toUpperCase().slice(0, 20),
+                  })
+                }
+                autoCapitalize="characters"
+                autoComplete="off"
+              />
+            </div>
+          )}
         </div>
         {mode === "login" && (
           <Link

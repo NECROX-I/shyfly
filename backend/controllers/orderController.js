@@ -7,6 +7,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const ApiError = require("../utils/ApiError");
 const { getSettings, checkPincode } = require("../utils/settings");
 const mail = require("../utils/email");
+const candy = require("../utils/candy");
 const notify = require("../utils/notify");
 const crypto2 = require("crypto");
 const ReturnRequest = require("../models/ReturnRequest");
@@ -99,6 +100,21 @@ const cancelAndRestock = async (order, note) => {
   if (order.payment.status === "paid") order.payment.status = "refund_pending";
   else if (order.payment.status === "pending") order.payment.status = "failed";
   order.timeline.push({ status: "cancelled", note });
+  // 🍬 give back candies that were used on this order (once)
+  if (order.candyUsed > 0 && !order.candyRefunded && order.user) {
+    try {
+      await candy.credit(
+        order.user,
+        order.candyUsed,
+        "refund",
+        `Order ${order.orderNumber} cancelled`,
+        order,
+      );
+      order.candyRefunded = true;
+    } catch (e) {
+      console.error("candy refund failed:", order.orderNumber, e.message);
+    }
+  }
   if (order.payment.status === "refund_pending") await autoRefund(order);
   await order.save();
 };
@@ -143,6 +159,7 @@ const publicOrder = (o) => ({
   discount: o.discount,
   shipping: o.shipping,
   codFee: o.codFee,
+  candyUsed: o.candyUsed || 0,
   total: o.total,
   couponCode: o.couponCode,
   courier: o.courier,
@@ -294,7 +311,11 @@ exports.placeOrder = asyncHandler(async (req, res) => {
   const afterDiscount = subtotal - discount;
   const shipping = afterDiscount >= R.freeShippingMin ? 0 : R.shippingFee;
   const codFee = 0; // no extra charge for Cash on Delivery
-  const total = afterDiscount + shipping + codFee;
+  // 🍬 candies (1 = ₹1) pay part of the order; free-shipping stays based on the pre-candy amount
+  const candyUsed = req.body.useCandies
+    ? candy.redeemable(req.user?.candies, afterDiscount)
+    : 0;
+  const total = afterDiscount - candyUsed + shipping + codFee;
   if (paymentMethod === "cod" && total > R.codMax)
     throw new ApiError(
       400,
@@ -311,6 +332,8 @@ exports.placeOrder = asyncHandler(async (req, res) => {
 
   await reserve(lines);
   let couponTaken = false;
+  let candyTaken = 0;
+  let candyBalance = null;
   try {
     if (coupon) {
       const r = await Coupon.updateOne(
@@ -337,6 +360,7 @@ exports.placeOrder = asyncHandler(async (req, res) => {
       couponCode: coupon?.code,
       shipping,
       codFee,
+      candyUsed,
       total,
       notes,
       eta: { from: pin.from, to: pin.to },
@@ -354,6 +378,17 @@ exports.placeOrder = asyncHandler(async (req, res) => {
     });
     await order.validate();
 
+    // 🍬 spend candies atomically — fails if the balance dropped meanwhile (e.g. two tabs)
+    if (candyUsed > 0) {
+      candyBalance = await candy.take(req.user._id, candyUsed);
+      if (candyBalance === null)
+        throw new ApiError(
+          409,
+          "Your candy balance changed. Please review your order and try again.",
+        );
+      candyTaken = candyUsed;
+    }
+
     let razorpay;
     if (paymentMethod === "razorpay") {
       const rzOrder = await rzp().orders.create({
@@ -369,6 +404,15 @@ exports.placeOrder = asyncHandler(async (req, res) => {
       };
     }
     await order.save();
+    if (candyTaken)
+      await candy.log(
+        req.user._id,
+        -candyTaken,
+        "redeem",
+        `Used on order ${order.orderNumber}`,
+        order,
+        candyBalance,
+      );
     if (paymentMethod === "cod") notify.orderPlaced(order, req);
     await saveAddress(req.user, address, customer);
     res
@@ -378,6 +422,7 @@ exports.placeOrder = asyncHandler(async (req, res) => {
     await restock(lines);
     if (couponTaken)
       await Coupon.updateOne({ _id: coupon._id }, { $inc: { usedCount: -1 } });
+    if (candyTaken) await candy.give(req.user._id, candyTaken);
     throw e;
   }
 });

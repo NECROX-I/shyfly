@@ -195,6 +195,8 @@ exports.buildInvoicePdf = (order, store = {}) =>
         `Discount${order.couponCode ? ` (${order.couponCode})` : ""}`,
         "− " + inr(order.discount),
       );
+    if (order.candyUsed > 0)
+      row("Candy redeemed", "− " + inr(order.candyUsed));
     row("Shipping", order.shipping ? inr(order.shipping) : "Free");
     if (order.codFee > 0) row("COD fee", inr(order.codFee));
     doc

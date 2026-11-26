@@ -6,6 +6,8 @@ const ApiError = require("../utils/ApiError");
 const crypto = require("crypto");
 const { normalizeEmail } = require("validator"); // same normalisation signup applies, so login matches what was stored
 const mail = require("../utils/email");
+const CandyTransaction = require("../models/CandyTransaction");
+const candy = require("../utils/candy");
 
 const sign = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -19,10 +21,15 @@ const publicUser = (u) => ({
   role: u.role,
   wishlist: u.wishlist,
   addresses: u.addresses,
+  candies: u.candies || 0,
+  referralCode: u.referralCode || null,
 });
 
 exports.register = asyncHandler(async (req, res) => {
   const { name, email, phone, password } = req.body;
+  const refCode = String(req.body.referralCode || "")
+    .trim()
+    .toUpperCase();
   if (await User.findOne({ email }))
     throw new ApiError(400, "An account with this email already exists");
   if (await User.findOne({ phone }))
@@ -30,10 +37,48 @@ exports.register = asyncHandler(async (req, res) => {
       400,
       "An account with this mobile number already exists",
     );
-  const user = await User.create({ name, email, phone, password });
-  res
-    .status(201)
-    .json({ success: true, token: sign(user._id), user: publicUser(user) });
+  // 🍬 referral: a wrong code is rejected up-front so nobody silently loses the bonus
+  let referrer = null;
+  if (refCode) {
+    referrer = await User.findOne({ referralCode: refCode, isActive: true });
+    if (!referrer) throw new ApiError(400, "Invalid referral code");
+  }
+  const user = await User.create({
+    name,
+    email,
+    phone,
+    password,
+    referredBy: referrer?._id,
+  });
+
+  // 🍬 joined on their own → 200 · joined with a friend's code → 100 each
+  let candyBonus;
+  if (referrer) {
+    candyBonus = candy.RULES.referralBonus;
+    await candy.credit(
+      user._id,
+      candyBonus,
+      "referral_bonus",
+      `Joined with ${referrer.name.split(" ")[0]}'s code`,
+    );
+    await candy.credit(
+      referrer._id,
+      candy.RULES.referralBonus,
+      "referral_reward",
+      `${name.split(" ")[0]} joined with your code`,
+    );
+  } else {
+    candyBonus = candy.RULES.signupBonus;
+    await candy.credit(user._id, candyBonus, "signup", "Welcome bonus");
+  }
+  await candy.ensureReferralCode(user);
+  const fresh = await User.findById(user._id); // pick up the credited balance
+  res.status(201).json({
+    success: true,
+    token: sign(user._id),
+    user: publicUser(fresh),
+    candyBonus,
+  });
 });
 
 exports.login = asyncHandler(async (req, res) => {
@@ -46,12 +91,35 @@ exports.login = asyncHandler(async (req, res) => {
   if (!user || !(await user.matchPassword(password)))
     throw new ApiError(401, "Incorrect email/mobile or password");
   if (!user.isActive) throw new ApiError(401, "This account is deactivated");
+  await candy.ensureReferralCode(user); // older accounts get their code on first login
   res.json({ success: true, token: sign(user._id), user: publicUser(user) });
 });
 
-exports.me = asyncHandler(async (req, res) =>
-  res.json({ success: true, user: publicUser(req.user) }),
-);
+exports.me = asyncHandler(async (req, res) => {
+  await candy.ensureReferralCode(req.user);
+  res.json({ success: true, user: publicUser(req.user) });
+});
+
+// 🍬 wallet: balance, referral code, rules and the last 50 movements
+exports.candies = asyncHandler(async (req, res) => {
+  await candy.ensureReferralCode(req.user);
+  const [fresh, history, referred] = await Promise.all([
+    User.findById(req.user._id).select("candies referralCode"),
+    CandyTransaction.find({ user: req.user._id })
+      .sort("-createdAt")
+      .limit(50)
+      .lean(),
+    User.countDocuments({ referredBy: req.user._id }),
+  ]);
+  res.json({
+    success: true,
+    balance: fresh?.candies || 0,
+    referralCode: fresh?.referralCode || null,
+    referred,
+    rules: candy.RULES,
+    history,
+  });
+});
 
 exports.updateMe = asyncHandler(async (req, res) => {
   const { name, phone, addresses } = req.body;
@@ -68,6 +136,7 @@ exports.updateMe = asyncHandler(async (req, res) => {
   }
   if (Array.isArray(addresses)) req.user.addresses = addresses.slice(0, 5);
   await req.user.save();
+  await candy.ensureReferralCode(req.user);
   res.json({ success: true, user: publicUser(req.user) });
 });
 

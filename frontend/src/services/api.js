@@ -33,6 +33,7 @@ export const authAPI = {
   register: (d) => api.post("/auth/register", d),
   login: (d) => api.post("/auth/login", d),
   me: () => api.get("/auth/me"),
+  candies: () => api.get("/auth/candies"),
   forgot: (email) => api.post("/auth/forgot-password", { email }),
   reset: (d) => api.post("/auth/reset-password", d),
   changePassword: (d) => api.put("/auth/password", d),

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiUser, FiPackage, FiStar, FiEdit2, FiCheck, FiTruck, FiGift, FiPercent, FiMapPin } from 'react-icons/fi'
+import { FiUser, FiPackage, FiStar, FiEdit2, FiCheck, FiTruck, FiGift, FiPercent, FiMapPin, FiCopy, FiShare2 } from 'react-icons/fi'
 import SEO from '../components/SEO'
 import OrderTracker from '../components/OrderTracker'
 import { authAPI, orderAPI } from '../services/api'
 import { useAuth } from '../store'
-import { errMsg } from '../lib/format'
+import { errMsg, fmtDate } from '../lib/format'
 
-const TABS = [['profile', 'My Profile', FiUser], ['orders', 'My Orders', FiPackage], ['premium', 'Shyfly Premium', FiStar]]
+const CandyIcon = ({ size = 16 }) => <span style={{ fontSize: size, lineHeight: 1 }}>🍬</span>
+const TABS = [['profile', 'My Profile', FiUser], ['orders', 'My Orders', FiPackage], ['candy', 'My Candy', CandyIcon], ['premium', 'Shyfly Premium', FiStar]]
 
 const Row = ({ label, children }) => (
   <div className="flex items-center justify-between gap-4 border-b border-plum-50 py-3.5 last:border-0">
@@ -95,6 +96,62 @@ function Profile({ user, setUser }) {
   )
 }
 
+function Candy({ user, setUser }) {
+  const [d, setD] = useState(null)
+  useEffect(() => {
+    authAPI.candies().then((r) => { setD(r.data); if (r.data.balance !== user.candies) setUser({ ...user, candies: r.data.balance, referralCode: r.data.referralCode }) }).catch(() => setD(false))
+  }, []) // eslint-disable-line
+  if (d === null) return <div className="skeleton h-64 rounded-3xl" />
+  if (d === false) return <p className="rounded-3xl border border-dashed border-plum-200 p-10 text-center text-plum-700/70">Couldn’t load your candies. Please try again.</p>
+  const rules = d.rules || {}
+  const code = d.referralCode
+  const link = code ? `${window.location.origin}/login?ref=${code}` : ''
+  const msg = `Join Shyfly with my code ${code} and we both get ${rules.referralBonus || 100} candies 🍬 (1 candy = ₹1). ${link}`
+  const copy = async (text, ok) => { try { await navigator.clipboard.writeText(text); toast.success(ok) } catch { toast.error('Couldn’t copy — please copy it manually') } }
+  return (
+    <div className="grid gap-8 lg:grid-cols-2">
+      <section className="h-fit rounded-3xl bg-gradient-to-br from-plum-800 to-rose-500 p-7 text-white sm:p-9">
+        <p className="text-[11px] font-semibold uppercase tracking-[.2em] text-white/80">Your candy balance</p>
+        <p className="mt-3 font-display text-7xl font-semibold leading-none">🍬 {d.balance}</p>
+        <p className="mt-3 text-white/85">Worth ₹{d.balance * (rules.rate || 1)} — 1 candy = ₹1</p>
+        <p className="mt-5 rounded-2xl bg-white/10 px-4 py-3 text-sm text-white/90">Use candies at checkout to pay up to {rules.maxRedeemPercent ?? 50}% of your order. Cancelled orders get their candies back.</p>
+      </section>
+
+      <section className="h-fit rounded-3xl border border-plum-100 p-6 sm:p-8">
+        <h2 className="flex items-center gap-2 font-display text-3xl font-semibold text-plum-800"><FiGift size={22} className="text-rose-500" /> Invite friends</h2>
+        <p className="mt-2 text-sm leading-relaxed text-plum-700/70">Share your code. When a friend signs up with it, you both get <b>{rules.referralBonus || 100} candies</b>.</p>
+        {code ? (
+          <>
+            <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl bg-blush px-5 py-4">
+              <span className="font-display text-3xl font-semibold tracking-wider text-plum-800">{code}</span>
+              <button onClick={() => copy(code, 'Code copied')} aria-label="Copy code" className="grid h-11 w-11 place-items-center rounded-full bg-white text-plum-800 hover:text-rose-500"><FiCopy size={17} /></button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button onClick={() => copy(link, 'Invite link copied')} className="btn-outline inline-flex items-center gap-2"><FiCopy size={15} /> Copy link</button>
+              <a href={`https://wa.me/?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer" className="btn-plum inline-flex items-center gap-2"><FiShare2 size={15} /> Share on WhatsApp</a>
+            </div>
+          </>
+        ) : <p className="mt-4 text-sm text-plum-700/70">Your code is being generated — please refresh in a moment.</p>}
+        <p className="mt-5 text-sm text-plum-700/70">Friends joined with your code: <b className="text-plum-800">{d.referred}</b></p>
+      </section>
+
+      <section className="rounded-3xl border border-plum-100 p-6 sm:p-8 lg:col-span-2">
+        <h2 className="font-display text-3xl font-semibold text-plum-800">Candy history</h2>
+        {d.history.length === 0 ? <p className="mt-4 text-sm text-plum-700/70">Nothing here yet.</p> : (
+          <ul className="mt-4 divide-y divide-plum-50">
+            {d.history.map((h) => (
+              <li key={h._id} className="flex items-center justify-between gap-4 py-3.5">
+                <div className="min-w-0"><p className="text-[15px] font-medium text-plum-800">{h.note || h.type}</p><p className="text-xs text-plum-700/60">{fmtDate(h.createdAt)}</p></div>
+                <span className={`shrink-0 font-semibold ${h.amount > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>{h.amount > 0 ? '+' : '−'}{Math.abs(h.amount)} 🍬</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  )
+}
+
 function Premium() {
   const perks = [[FiTruck, 'Free delivery', 'On every order, no minimum.'], [FiPercent, 'Member-only prices', 'Special offers kept just for members.'], [FiGift, 'Early access', 'Shop new collections before everyone else.']]
   return (
@@ -124,7 +181,7 @@ export default function Account() {
   const cancel = async (o) => {
     const paid = o.payment?.status === 'paid'
     if (!window.confirm(paid ? 'Cancel this order? Your payment will be refunded to the original payment method.' : 'Cancel this order?')) return
-    try { const r = await orderAPI.cancel({ orderNumber: o.orderNumber, phone: o.customer?.phone || user.phone || '' }); setOrders((x) => x.map((y) => (y._id === o._id ? { ...y, ...r.data.order } : y))); toast.success(paid ? 'Order cancelled — refund started' : 'Order cancelled') }
+    try { const r = await orderAPI.cancel({ orderNumber: o.orderNumber, phone: o.customer?.phone || user.phone || '' }); setOrders((x) => x.map((y) => (y._id === o._id ? { ...y, ...r.data.order } : y))); toast.success(paid ? 'Order cancelled — refund started' : 'Order cancelled'); if (o.candyUsed > 0) authAPI.me().then((m) => setUser(m.data.user)).catch(() => {}) }
     catch (err) { toast.error(errMsg(err)) }
   }
   return (
@@ -153,6 +210,7 @@ export default function Account() {
               : orders.map((o) => <OrderTracker key={o._id} order={o} onCancel={cancel} onReload={load} />)}
           </div>
         )}
+        {tab === 'candy' && <Candy user={user} setUser={setUser} />}
         {tab === 'premium' && <Premium />}
       </div>
     </div>

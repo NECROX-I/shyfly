@@ -132,6 +132,12 @@ export default function Invoice() {
             <dd>− {inr(o.discount)}</dd>
           </div>
         )}
+        {o.candyUsed > 0 && (
+          <div className="flex justify-between">
+            <dt>Candy redeemed</dt>
+            <dd>− {inr(o.candyUsed)}</dd>
+          </div>
+        )}
         <div className="flex justify-between">
           <dt>Shipping</dt>
           <dd>{o.shipping ? inr(o.shipping) : "Free"}</dd>

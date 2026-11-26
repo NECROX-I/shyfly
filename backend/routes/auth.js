@@ -15,6 +15,7 @@ router.post(
     body("password")
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters"),
+    body("referralCode").optional({ checkFalsy: true }).isString().isLength({ max: 20 }),
   ],
   validate,
   c.register,
@@ -68,6 +69,7 @@ router.put(
   c.changePassword,
 );
 router.get("/me", protect, c.me);
+router.get("/candies", protect, c.candies);
 router.put("/me", protect, c.updateMe);
 router.get("/wishlist", protect, c.getWishlist);
 router.put("/wishlist", protect, c.setWishlist);

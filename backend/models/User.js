@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema(
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     addresses: [addressSchema],
     isActive: { type: Boolean, default: true },
+    // 🍬 candy wallet (1 candy = ₹1). History lives in CandyTransaction.
+    candies: { type: Number, default: 0, min: 0 },
+    referralCode: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     resetTokenHash: { type: String, select: false },
     resetExpires: { type: Date, select: false },
   },
