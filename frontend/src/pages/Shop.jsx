@@ -30,7 +30,7 @@ function FilterPanel({ facets, params, set, cats, category, clear }) {
   const toggleList = (k, v) => { const cur = list(k); set({ [k]: (cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v]).join(',') || null }) }
   const pct = (v) => ((v - min) / Math.max(1, max - min)) * 100
   const toggle = (k, label) => (
-    <button onClick={() => set({ [k]: params.get(k) === 'true' ? null : 'true' })} className="flex w-full items-center justify-between py-1.5 text-[15px]">
+    <button onClick={() => set({ [k]: params.get(k) === 'true' ? null : 'true' })} className="flex w-full items-center justify-between py-2.5 text-[15px] lg:py-1.5">
       {label}<span className={`grid h-5 w-9 items-center rounded-full p-0.5 transition ${params.get(k) === 'true' ? 'bg-rose-500' : 'bg-plum-100'}`}><span className={`h-4 w-4 rounded-full bg-white shadow transition ${params.get(k) === 'true' ? 'translate-x-4' : ''}`} /></span>
     </button>
   )
@@ -40,11 +40,11 @@ function FilterPanel({ facets, params, set, cats, category, clear }) {
       {category?.children?.length > 0 && (
         <Section title="Category">
           <div className="flex flex-col gap-1">
-            {category.children.map((s) => <Link key={s._id} to={`/shop/${category.slug}/${s.slug}`} className="py-1.5 text-[15px] text-plum-900/80 hover:text-rose-500">{s.name}</Link>)}
+            {category.children.map((s) => <Link key={s._id} to={`/shop/${category.slug}/${s.slug}`} className="py-2.5 text-[15px] text-plum-900/80 hover:text-rose-500 lg:py-1.5">{s.name}</Link>)}
           </div>
         </Section>
       )}
-      {!category && <Section title="Category"><div className="flex flex-col gap-1">{cats.map((c) => <Link key={c._id} to={`/shop/${c.slug}`} className="py-1.5 text-[15px] text-plum-900/80 hover:text-rose-500">{c.name}</Link>)}</div></Section>}
+      {!category && <Section title="Category"><div className="flex flex-col gap-1">{cats.map((c) => <Link key={c._id} to={`/shop/${c.slug}`} className="py-2.5 text-[15px] text-plum-900/80 hover:text-rose-500 lg:py-1.5">{c.name}</Link>)}</div></Section>}
 
       <Section title="Price">
         <div className="relative mx-2 mb-7 mt-2 h-6">
@@ -57,14 +57,14 @@ function FilterPanel({ facets, params, set, cats, category, clear }) {
       </Section>
 
       {facets?.sizes?.length > 0 && (
-        <Section title="Size"><div className="flex flex-wrap gap-2">{facets.sizes.map((s) => <button key={s} onClick={() => toggleList('sizes', s)} className={`chip !px-3.5 !py-1.5 ${list('sizes').includes(s) ? 'chip-on' : ''}`}>{s}</button>)}</div></Section>
+        <Section title="Size"><div className="flex flex-wrap gap-2">{facets.sizes.map((s) => <button key={s} onClick={() => toggleList('sizes', s)} className={`chip !px-4 !py-2.5 lg:!px-3.5 lg:!py-1.5 ${list('sizes').includes(s) ? 'chip-on' : ''}`}>{s}</button>)}</div></Section>
       )}
       {facets?.colors?.length > 0 && (
         <Section title="Colour">
           <div className="flex flex-wrap gap-2.5">
             {facets.colors.map((c) => {
               const on = list('colors').map((x) => x.toLowerCase()).includes(c.name.toLowerCase())
-              return <button key={c.name} onClick={() => toggleList('colors', c.name)} title={c.name} aria-label={c.name} className={`relative grid h-9 w-9 place-items-center rounded-full ring-offset-2 transition ${on ? 'ring-2 ring-plum-700' : 'ring-1 ring-plum-100 hover:ring-plum-400'}`}><span className="h-full w-full rounded-full border border-white" style={{ background: c.hex || '#ccc' }} />{on && <FiCheck className={`absolute ${['#FAFAFA', '#F6F0E4', '#F4EDE4'].includes(c.hex) ? 'text-plum-800' : 'text-white'}`} size={14} />}</button>
+              return <button key={c.name} onClick={() => toggleList('colors', c.name)} title={c.name} aria-label={c.name} className={`relative grid h-10 w-10 place-items-center rounded-full ring-offset-2 lg:h-9 lg:w-9 transition ${on ? 'ring-2 ring-plum-700' : 'ring-1 ring-plum-100 hover:ring-plum-400'}`}><span className="h-full w-full rounded-full border border-white" style={{ background: c.hex || '#ccc' }} />{on && <FiCheck className={`absolute ${['#FAFAFA', '#F6F0E4', '#F4EDE4'].includes(c.hex) ? 'text-plum-800' : 'text-white'}`} size={14} />}</button>
             })}
           </div>
         </Section>
@@ -148,65 +148,65 @@ export default function Shop() {
       <section className="relative overflow-hidden bg-blush">
         <div className="absolute inset-0 bg-petal" />
         <Butterfly className="absolute right-6 top-6 hidden w-20 animate-float opacity-80 sm:block" />
-        <div className="container-x relative py-10 sm:py-14">
+        <div className="container-x relative py-4 sm:py-14">
           <nav className="-my-2 flex flex-wrap items-center gap-x-1.5 text-xs uppercase tracking-wider text-plum-700/60">
             <Link to="/" className="inline-block py-2 hover:text-rose-500">Home</Link><FiChevronRight size={12} />
             <Link to="/shop" className="inline-block py-2 hover:text-rose-500">Shop</Link>
             {top && <><FiChevronRight size={12} /><Link to={`/shop/${top.slug}`} className={`inline-block py-2 ${subCat ? 'hover:text-rose-500' : 'text-plum-900'}`}>{top.name}</Link></>}
             {subCat && <><FiChevronRight size={12} /><span className="text-plum-900">{subCat.name}</span></>}
           </nav>
-          <div className="mt-4 flex items-end justify-between gap-6">
+          <div className="mt-2 flex items-end justify-between gap-6 sm:mt-4">
             <div>
-              <h1 className="font-display text-5xl font-semibold text-plum-800 sm:text-6xl">{title}</h1>
-              {top && !q && <p className="mt-2 max-w-md text-plum-800/70">{subCat ? `Explore our ${subCat.name.toLowerCase()} collection.` : top.tagline}</p>}
+              <h1 className="font-display text-[32px] font-semibold leading-tight text-plum-800 sm:text-6xl">{title}</h1>
+              {top && !q && <p className="mt-1 max-w-md text-sm text-plum-800/70 sm:mt-2 sm:text-base">{subCat ? `Explore our ${subCat.name.toLowerCase()} collection.` : top.tagline}</p>}
             </div>
             <div className="hidden h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-soft sm:block"><ProductArt kind={heroKind} seed={title} className="h-full w-full" /></div>
           </div>
           {top && !subCat && top.children.length > 0 && (
-            <div className="no-scrollbar mt-6 flex gap-2.5 overflow-x-auto">
+            <div className="no-scrollbar mt-3 flex gap-2.5 overflow-x-auto sm:mt-6">
               {top.children.map((s) => <Link key={s._id} to={`/shop/${top.slug}/${s.slug}`} className="chip shrink-0">{s.name}</Link>)}
             </div>
           )}
-          {subCat && <div className="no-scrollbar mt-6 flex gap-2.5 overflow-x-auto">{top.children.map((s) => <Link key={s._id} to={`/shop/${top.slug}/${s.slug}`} className={`chip shrink-0 ${s._id === subCat._id ? 'chip-on' : ''}`}>{s.name}</Link>)}</div>}
+          {subCat && <div className="no-scrollbar mt-3 flex gap-2.5 overflow-x-auto sm:mt-6">{top.children.map((s) => <Link key={s._id} to={`/shop/${top.slug}/${s.slug}`} className={`chip shrink-0 ${s._id === subCat._id ? 'chip-on' : ''}`}>{s.name}</Link>)}</div>}
         </div>
       </section>
 
-      <div className="container-x grid gap-10 py-8 grid-cols-[minmax(0,1fr)] lg:grid-cols-[260px_minmax(0,1fr)] lg:py-10">
+      <div className="container-x grid gap-10 py-3 grid-cols-[minmax(0,1fr)] sm:py-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:py-10">
         <aside className="hidden lg:block"><div className="sticky top-[calc(var(--header-h,120px)+1rem)] max-h-[calc(100dvh-var(--header-h,120px)-2rem)] overflow-y-auto pr-3 no-scrollbar"><FilterPanel facets={facets} params={params} set={set} cats={cats} category={subCat ? top : top} clear={clear} /></div></aside>
 
         <div>
           <div className="sticky top-[var(--header-h,60px)] z-20 -mx-4 flex items-center justify-between gap-3 border-b border-plum-50 bg-white px-4 py-1.5 sm:py-3 lg:bg-white/90 lg:backdrop-blur-xl sm:mx-0 sm:px-0">
-            <button onClick={() => setSheet(true)} className="chip max-sm:!py-1.5 lg:hidden"><FiSliders size={15} /> Filters{activeChips.length > 0 && <span className="grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-[10px] text-white">{activeChips.length}</span>}</button>
+            <button onClick={() => setSheet(true)} className="chip max-sm:!py-2 lg:hidden"><FiSliders size={15} /> Filters{activeChips.length > 0 && <span className="grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-[10px] text-white">{activeChips.length}</span>}</button>
             <p className="hidden text-sm text-plum-700/70 lg:block">{loading ? 'Loading…' : <><b className="text-plum-900">{meta.total}</b> {meta.total === 1 ? 'product' : 'products'}</>}</p>
             <div className="ml-auto flex items-center gap-3">
               <div className="hidden items-center gap-1 sm:flex">
                 {[2, 3, 4].map((n) => <button key={n} onClick={() => { setCols(n); localStorage.setItem('shyfly-cols', n) }} aria-label={`${n} columns`} className={`grid h-9 w-9 place-items-center rounded-full transition ${cols === n ? 'bg-plum-700 text-white' : 'text-plum-700 hover:bg-plum-50'}`}><FiGrid size={15} /></button>)}
               </div>
-              <select value={params.get('sort') || 'newest'} onChange={(e) => set({ sort: e.target.value === 'newest' ? null : e.target.value })} className="rounded-full border border-plum-100 bg-white px-4 py-1.5 text-sm focus:border-rose-400 focus:outline-none sm:py-2.5" aria-label="Sort">
+              <select value={params.get('sort') || 'newest'} onChange={(e) => set({ sort: e.target.value === 'newest' ? null : e.target.value })} className="rounded-full border border-plum-100 bg-white px-4 py-2 text-sm focus:border-rose-400 focus:outline-none sm:py-2.5" aria-label="Sort">
                 {SORTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
           </div>
 
           {activeChips.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {activeChips.map((c) => <button key={c.k + (c.v || '')} onClick={() => removeChip(c)} className="chip chip-on !py-1.5">{c.label}<FiX size={14} /></button>)}
-              <button onClick={clear} className="px-2 text-sm text-plum-700 underline">Clear all</button>
+            <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
+              {activeChips.map((c) => <button key={c.k + (c.v || '')} onClick={() => removeChip(c)} className="chip chip-on !py-2 lg:!py-1.5">{c.label}<FiX size={14} /></button>)}
+              <button onClick={clear} className="px-2 py-2 text-sm text-plum-700 underline">Clear all</button>
             </div>
           )}
 
-          <div className="mt-8">
+          <div className="mt-4 sm:mt-8">
             {loading ? <GridSkeleton n={9} cols={gridCls} /> : products.length === 0 ? (
-              <div className="py-20 text-center">
+              <div className="py-12 text-center sm:py-20">
                 <div className="mx-auto mb-5 w-24"><Butterfly /></div>
-                <p className="font-display text-4xl font-semibold text-plum-800">Nothing here yet</p>
+                <p className="font-display text-3xl font-semibold text-plum-800 sm:text-4xl">Nothing here yet</p>
                 <p className="mt-2 text-plum-700/70">Try removing a filter or browsing another category.</p>
                 <button onClick={clear} className="btn-plum mt-6">Clear filters</button>
               </div>
             ) : (
               <>
-                <div className={`grid gap-x-3 gap-y-9 sm:gap-x-5 ${gridCls}`}>{products.map((p) => <ProductCard key={p._id} product={p} />)}</div>
-                <div className="mt-14 text-center">
+                <div className={`grid gap-x-3 gap-y-6 sm:gap-x-5 sm:gap-y-9 ${gridCls}`}>{products.map((p) => <ProductCard key={p._id} product={p} />)}</div>
+                <div className="mt-8 text-center sm:mt-14">
                   <p className="text-sm text-plum-700/60">Showing {products.length} of {meta.total}</p>
                   <div className="mx-auto mt-3 h-1 w-48 overflow-hidden rounded-full bg-plum-100"><div className="h-full rounded-full bg-rose-500 transition-all" style={{ width: `${(products.length / Math.max(1, meta.total)) * 100}%` }} /></div>
                   {meta.page < meta.pages && <button onClick={loadMore} disabled={more} className="btn-outline mt-6">{more ? 'Loading…' : 'Load more'}</button>}

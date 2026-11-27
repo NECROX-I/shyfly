@@ -34,7 +34,7 @@
   .chip { @apply inline-flex items-center gap-1.5 rounded-full border border-plum-100 bg-white px-4 py-2 text-sm text-plum-800 transition hover:border-plum-400; }
   .chip-on { @apply border-plum-700 bg-plum-700 text-white hover:border-plum-700; }
   .eyebrow { @apply text-[11px] font-medium uppercase tracking-[.32em] text-rose-500; }
-  .h-section { @apply font-display text-4xl font-semibold leading-[1.05] text-plum-800 sm:text-5xl; }
+  .h-section { @apply font-display text-[30px] font-semibold leading-[1.08] min-[400px]:text-[34px] sm:leading-[1.05] text-plum-800 sm:text-5xl; }
   .skeleton { background: #f9eaf0; animation: skel 1.6s ease-in-out infinite; }
   .card-lift { @apply transition-all duration-500 hover:-translate-y-1 hover:shadow-lift; }
 }
@@ -120,10 +120,17 @@ html { scroll-padding-top: calc(var(--header-h, 0px) + 12px); }
 .dark .bg-petal { opacity: .35; }
 
 .dark .bg-white { background-color:#1c0f17 }
-.dark .bg-white\/95, .dark .lg\:bg-white\/95 { background-color:rgba(28,15,23,.95) }
-.dark .bg-white\/90, .dark .lg\:bg-white\/90 { background-color:rgba(28,15,23,.9) }
-.dark .bg-white\/60, .dark .lg\:bg-white\/60 { background-color:rgba(28,15,23,.6) }
-.dark .bg-white\/50, .dark .lg\:bg-white\/50 { background-color:rgba(28,15,23,.5) }
+.dark .bg-white\/95 { background-color:rgba(28,15,23,.95) }
+.dark .bg-white\/90 { background-color:rgba(28,15,23,.9) }
+.dark .bg-white\/60 { background-color:rgba(28,15,23,.6) }
+.dark .bg-white\/50 { background-color:rgba(28,15,23,.5) }
+/* the lg: variants must only kick in at lg — otherwise phones get a see-through bottom bar / sticky toolbar in dark mode */
+@media (min-width:1024px) {
+  .dark .lg\:bg-white\/95 { background-color:rgba(28,15,23,.95) }
+  .dark .lg\:bg-white\/90 { background-color:rgba(28,15,23,.9) }
+  .dark .lg\:bg-white\/60 { background-color:rgba(28,15,23,.6) }
+  .dark .lg\:bg-white\/50 { background-color:rgba(28,15,23,.5) }
+}
 .dark .bg-blush { background-color:#26141f }
 .dark .bg-blush\/60 { background-color:rgba(38,20,31,.60) }
 .dark .bg-blush\/50 { background-color:rgba(38,20,31,.50) }

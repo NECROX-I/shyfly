@@ -25,8 +25,9 @@ export function useVariants(product) {
     if (!product) return;
     const firstInStock = product.variants.find((v) => v.stock > 0);
     setColor(colors.length ? firstInStock?.color || colors[0].name : null);
-    setSize(null);
-  }, [product, colors]);
+    // a single available size (e.g. "Free size") needs no choosing
+    setSize(sizes.length === 1 && firstInStock?.size === sizes[0] ? sizes[0] : null);
+  }, [product, colors, sizes]);
 
   const match = (c, s) =>
     product?.variants.find(
@@ -74,7 +75,7 @@ export default function VariantPicker({ v, shake }) {
                   onClick={() => v.setColor(c.name)}
                   title={c.name}
                   aria-label={c.name}
-                  className={`relative grid h-10 w-10 place-items-center rounded-full ring-offset-2 transition ${v.color === c.name ? "ring-2 ring-plum-700" : "ring-1 ring-plum-100 hover:ring-plum-400"} ${out ? "opacity-40" : ""}`}
+                  className={`relative grid h-11 w-11 place-items-center rounded-full ring-offset-2 transition ${v.color === c.name ? "ring-2 ring-plum-700" : "ring-1 ring-plum-100 hover:ring-plum-400"} ${out ? "opacity-40" : ""}`}
                 >
                   <span
                     className="h-full w-full rounded-full border border-white"
@@ -113,7 +114,7 @@ export default function VariantPicker({ v, shake }) {
                   key={s}
                   disabled={st === 0}
                   onClick={() => v.setSize(s)}
-                  className={`min-w-[48px] rounded-full border px-4 py-2.5 text-sm transition ${v.size === s ? "border-plum-700 bg-plum-700 text-white" : "border-plum-100 bg-white text-plum-900 hover:border-plum-500"} ${st === 0 ? "cursor-not-allowed text-plum-300 line-through opacity-60" : ""} ${shake && v.needsSize ? "border-rose-400" : ""}`}
+                  className={`min-h-[44px] min-w-[52px] rounded-full border px-4 py-2.5 text-sm transition ${v.size === s ? "border-plum-700 bg-plum-700 text-white" : "border-plum-100 bg-white text-plum-900 hover:border-plum-500"} ${st === 0 ? "cursor-not-allowed text-plum-300 line-through opacity-60" : ""} ${shake && v.needsSize ? "border-rose-400" : ""}`}
                 >
                   {s}
                   {st > 0 && st <= 3 && (

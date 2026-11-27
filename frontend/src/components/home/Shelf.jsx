@@ -21,22 +21,22 @@ export default function Shelf({ category, index, products, tone = "white" }) {
   return (
     <section
       ref={box}
-      className={`cv-auto relative py-14 sm:py-20 ${tone === "blush" ? "bg-blush" : ""}`}
+      className={`cv-auto relative py-8 sm:py-20 ${tone === "blush" ? "bg-blush" : ""}`}
     >
       {tone === "blush" && (
         <div className="pointer-events-none absolute inset-0 bg-petal opacity-60" />
       )}
       <div className="container-x relative">
-        <Reveal className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-          <div>
+        <Reveal className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
             <p className="eyebrow">
               {String(index + 1).padStart(2, "0")} — {category.name}
             </p>
-            <h2 className="h-section mt-3 max-w-xl">
+            <h2 className="h-section mt-2 max-w-xl sm:mt-3">
               {category.tagline || category.name}
             </h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <button
               onClick={() => scrollBy(-1)}
               aria-label="Scroll left"
@@ -53,14 +53,14 @@ export default function Shelf({ category, index, products, tone = "white" }) {
             </button>
             <Link
               to={`/shop/${category.slug}`}
-              className="btn-outline !px-6 !py-3"
+              className="btn-outline !px-4 !py-2.5 sm:!px-6 sm:!py-3"
             >
               View all <FiArrowRight />
             </Link>
           </div>
         </Reveal>
 
-        <div className="no-scrollbar mt-6 flex gap-2.5 overflow-x-auto">
+        <div className="no-scrollbar mt-4 flex gap-2.5 overflow-x-auto sm:mt-6">
           {category.children.map((s) => (
             <Link
               key={s._id}
@@ -74,7 +74,7 @@ export default function Shelf({ category, index, products, tone = "white" }) {
 
         <div
           ref={scroller}
-          className="no-scrollbar -mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:mx-0 sm:gap-5 sm:px-0"
+          className="no-scrollbar -mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 sm:mx-0 sm:mt-8 sm:gap-5 sm:px-0"
         >
           {((near && products) || Array.from({ length: 5 })).map((p, k) => (
             <div

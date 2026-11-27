@@ -15,12 +15,12 @@ export default function Wishlist() {
   }, [ids.length]) // eslint-disable-line
   const shown = (items || []).filter((p) => ids.includes(p._id))
   return (
-    <div className="container-x py-12">
+    <div className="container-x py-6 sm:py-12">
       <SEO title="My wishlist" noindex />
       <p className="eyebrow">Saved for later</p><h1 className="h-section mt-2">My wishlist</h1>
       <div className="mt-10">
         {items === null ? <GridSkeleton n={4} cols="grid-cols-2 lg:grid-cols-4" /> : shown.length === 0 ? (
-          <div className="py-16 text-center"><p className="font-display text-4xl font-semibold text-plum-800">Your wishlist is empty</p><p className="mt-2 text-plum-700/70">Tap the heart on anything you love.</p><Link to="/shop" className="btn-plum mt-6">Discover pieces</Link></div>
+          <div className="py-10 text-center sm:py-16"><p className="font-display text-3xl font-semibold text-plum-800 sm:text-4xl">Your wishlist is empty</p><p className="mt-2 text-plum-700/70">Tap the heart on anything you love.</p><Link to="/shop" className="btn-plum mt-6">Discover pieces</Link></div>
         ) : <div className="grid grid-cols-2 gap-x-4 gap-y-9 lg:grid-cols-4">{shown.map((p) => <ProductCard key={p._id} product={p} />)}</div>}
       </div>
     </div>

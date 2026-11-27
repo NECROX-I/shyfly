@@ -29,7 +29,7 @@ export default function ResetPassword() {
   };
   if (!sp.get("token"))
     return (
-      <div className="container-x py-24 text-center">
+      <div className="container-x py-12 text-center sm:py-24">
         <p className="font-display text-4xl text-plum-800">
           This reset link is incomplete.
         </p>
@@ -39,7 +39,7 @@ export default function ResetPassword() {
       </div>
     );
   return (
-    <div className="container-x max-w-md py-20">
+    <div className="container-x max-w-md py-8 sm:py-20">
       <SEO title="Reset password" noindex />
       <h1 className="font-display text-5xl font-semibold text-plum-800">
         Choose a new password

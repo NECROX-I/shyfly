@@ -10,9 +10,9 @@ export default function About() {
   return (
     <>
       <SEO title="Our story" description="The story behind Shyfly Fashion – For Every Woman, Every You. Hand-picked jewellery, clothing, footwear and handbags, quality-checked before they reach you." />
-      <section className="relative overflow-hidden bg-blush py-20 text-center"><div className="bg-petal absolute inset-0" /><Butterfly className="mx-auto w-24 animate-float" />
+      <section className="relative overflow-hidden bg-blush py-12 text-center sm:py-20"><div className="bg-petal absolute inset-0" /><Butterfly className="mx-auto w-24 animate-float" />
         <div className="container-x relative"><img src="/logo-full.png" alt="Shyfly Fashion" className="mx-auto mt-4 w-72" /><p className="mx-auto mt-6 max-w-xl text-lg text-plum-800/80">{a.intro}</p></div></section>
-      <section className="container-x grid max-w-5xl gap-14 py-20 md:grid-cols-2">
+      <section className="container-x grid max-w-5xl gap-8 py-10 sm:gap-14 sm:py-20 md:grid-cols-2">
         <Reveal><p className="eyebrow">Our story</p><h1 className="h-section mt-3">{a.heading}</h1></Reveal>
         <Reveal delay={0.1} className="space-y-4 leading-relaxed text-plum-900/80">{(a.story || '').split(/\n\s*\n/).filter(Boolean).map((t, i) => <p key={i}>{t}</p>)}</Reveal>
       </section>

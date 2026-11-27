@@ -13,7 +13,7 @@ export default function Contact() {
   const on = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const submit = async (e) => { e.preventDefault(); setBusy(true); try { await shopAPI.contact(f); toast.success('Message sent — we’ll reply soon 💌'); setF({ name: '', email: '', phone: '', message: '' }) } catch (err) { toast.error(errMsg(err)) } finally { setBusy(false) } }
   return (
-    <div className="container-x grid max-w-5xl gap-12 py-14 lg:grid-cols-[1fr_1.2fr]">
+    <div className="container-x grid max-w-5xl gap-8 py-6 sm:gap-12 sm:py-14 lg:grid-cols-[1fr_1.2fr]">
       <SEO title="Contact us" description="Contact Shyfly Fashion – questions about an order, a return or a product? Message us on WhatsApp or send a note and we’ll reply soon." />
       <div><p className="eyebrow">Say hello</p><h1 className="h-section mt-2">We’d love to hear from you</h1>
         <div className="mt-8 space-y-4">

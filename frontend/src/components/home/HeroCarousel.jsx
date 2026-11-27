@@ -27,29 +27,29 @@ export default function HeroCarousel({ slides: raw = [] }) {
   if (!s) return null
 
   return (
-    <div ref={box} onMouseMove={onMove} onMouseLeave={() => { mx.set(0); my.set(0) }} className="group relative isolate h-full min-h-[500px] overflow-hidden rounded-[28px] text-white sm:min-h-[680px] md:min-h-[560px]">
+    <div ref={box} onMouseMove={onMove} onMouseLeave={() => { mx.set(0); my.set(0) }} className="group relative isolate h-full min-h-[430px] overflow-hidden rounded-[28px] text-white sm:min-h-[680px] md:min-h-[560px]">
       <AnimatePresence mode="sync">
         <motion.div key={i} className={`absolute inset-0 bg-gradient-to-br ${s.bg}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.9 }}
           drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.15} onDragEnd={(_, info) => { if (info.offset.x < -70) go(1); else if (info.offset.x > 70) go(-1) }}>
           <div className="absolute inset-0 bg-petal opacity-40" />
           <div className="absolute inset-0 opacity-[.07]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
 
-          <div className="container-x relative flex h-full max-w-none flex-col-reverse items-center justify-end gap-2 px-6 pb-14 pt-8 sm:px-12 md:flex-row md:justify-between">
+          <div className="container-x relative flex h-full max-w-none flex-col-reverse items-center justify-end gap-2 px-6 pb-12 pt-6 sm:px-12 sm:pb-14 sm:pt-8 md:flex-row md:justify-between">
             <div className="z-10 w-full max-w-lg text-center md:text-left">
               <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-[11px] font-medium uppercase tracking-[.38em] text-gold-300">{s.eyebrow}</motion.p>
-              <h1 className="mt-3 font-display text-[38px] font-semibold leading-[.98] sm:text-6xl md:text-7xl">
+              <h1 className="mt-2 font-display text-[34px] font-semibold leading-[.98] sm:mt-3 sm:text-6xl md:text-7xl">
                 <span className="sr-only">Shyfly Fashion – </span>
                 {s.title.map((line, k) => (
                   <span key={line} className="block overflow-hidden"><motion.span className={`block ${k === 1 ? 'italic text-rose-100' : ''}`} initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ delay: 0.25 + k * 0.12, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>{line}</motion.span></span>
                 ))}
               </h1>
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-white/80 md:mx-0">{s.sub}</motion.p>
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }} className="mt-7">
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-white/80 sm:mt-4 md:mx-0">{s.sub}</motion.p>
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }} className="mt-5 sm:mt-7">
                 <Link to={s.to} className="btn-white btn-sheen group/b">{s.cta}<FiArrowRight className="transition group-hover/b:translate-x-1" /></Link>
               </motion.div>
             </div>
 
-            <div className="relative grid h-36 w-36 shrink-0 place-items-center sm:h-64 sm:w-64 md:h-[400px] md:w-[400px]">
+            <div className="relative grid h-28 w-28 shrink-0 place-items-center min-[400px]:h-32 min-[400px]:w-32 sm:h-64 sm:w-64 md:h-[400px] md:w-[400px]">
               <motion.div style={{ x: tx2, y: ty2 }} className="absolute inset-0 rounded-full border border-dashed border-white/30 spin-slow" />
               <motion.div style={{ x: tx1, y: ty1 }} className="absolute inset-5 grid place-items-center rounded-full bg-white/10 shadow-[inset_0_0_60px_rgba(255,255,255,.15)] lg:backdrop-blur-sm sm:inset-8">
                 {s.image ? <img src={s.image} alt={s.title.join(' ')} className="h-full w-full rounded-full object-cover" /> : <div className="h-3/5 w-3/5 text-white lg:drop-shadow-[0_10px_30px_rgba(0,0,0,.25)]"><ProductArt kind={s.kind} glyphOnly className="h-full w-full" /></div>}

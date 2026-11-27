@@ -13,7 +13,7 @@ export default function FloatingWhatsApp() {
   const onProduct = pathname.startsWith('/product')
   return (
     <a href={waLink(whatsapp, 'Hi Shyfly! I need help with an order 💗')} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp"
-      className={`fixed bottom-[calc(var(--bnav-h,58px)+14px)] left-3 z-30 grid h-11 w-11 place-items-center sm:left-4 sm:h-12 sm:w-12 ${hideOnMobile ? 'max-lg:hidden' : ''} rounded-full bg-[#25D366] text-white shadow-lift transition hover:scale-110 lg:left-auto lg:right-6 lg:h-14 lg:w-14 ${onProduct ? 'lg:bottom-24' : 'lg:bottom-6'}`}>
+      className={`fixed bottom-[calc(var(--bnav-h,58px)+14px)] right-3 z-30 grid h-11 w-11 place-items-center sm:right-4 sm:h-12 sm:w-12 ${hideOnMobile ? 'max-lg:hidden' : ''} rounded-full bg-[#25D366] text-white shadow-lift transition hover:scale-110 lg:right-6 lg:h-14 lg:w-14 ${onProduct ? 'lg:bottom-24' : 'lg:bottom-6'}`}>
       <span className="absolute inset-0 animate-ping rounded-full bg-[#25D366] opacity-30" />
       <FaWhatsapp className="relative h-6 w-6 lg:h-7 lg:w-7" />
     </a>

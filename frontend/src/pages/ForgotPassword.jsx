@@ -22,9 +22,9 @@ export default function ForgotPassword() {
     }
   };
   return (
-    <div className="container-x max-w-md py-20">
+    <div className="container-x max-w-md py-8 sm:py-20">
       <SEO title="Forgot password" noindex />
-      <h1 className="font-display text-5xl font-semibold text-plum-800">
+      <h1 className="font-display text-[34px] font-semibold text-plum-800 sm:text-5xl">
         Forgot password?
       </h1>
       {done ? (

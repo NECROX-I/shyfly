@@ -185,23 +185,23 @@ export default function Account() {
     catch (err) { toast.error(errMsg(err)) }
   }
   return (
-    <div className="container-x py-10 sm:py-12">
+    <div className="container-x py-6 sm:py-12">
       <SEO title="My account" noindex />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="eyebrow">Hello</p><h1 className="h-section mt-2">{user.name}</h1></div>
         <div className="flex gap-3">{user.role === 'admin' && <Link to="/admin" className="btn-rose">Admin panel</Link>}<button onClick={() => { logout(); nav('/') }} className="btn-outline">Log out</button></div>
       </div>
 
-      <div role="tablist" className="mt-8 flex flex-wrap gap-2">
+      <div role="tablist" className="mt-5 grid grid-cols-2 gap-2 sm:mt-8 sm:flex sm:flex-wrap">
         {TABS.map(([k, label, I]) => (
           <button key={k} role="tab" aria-selected={tab === k} onClick={() => setSp(k === 'profile' ? {} : { tab: k }, { replace: true })}
-            className={`inline-flex min-h-[46px] items-center gap-2 rounded-full border px-4 text-sm sm:px-5 font-medium transition ${tab === k ? 'border-plum-700 bg-plum-700 text-white' : 'border-plum-200 bg-white text-plum-800 hover:border-rose-400'}`}>
+            className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border px-3 text-sm sm:justify-start sm:px-5 font-medium transition ${tab === k ? 'border-plum-700 bg-plum-700 text-white' : 'border-plum-200 bg-white text-plum-800 hover:border-rose-400'}`}>
             <I size={16} /> {label}{k === 'orders' && orders?.length ? <span className={`rounded-full px-2 text-xs ${tab === k ? 'bg-white/20' : 'bg-plum-50'}`}>{orders.length}</span> : null}
           </button>
         ))}
       </div>
 
-      <div className="mt-8">
+      <div className="mt-5 sm:mt-8">
         {tab === 'profile' && <Profile user={user} setUser={setUser} />}
         {tab === 'orders' && (
           <div className="space-y-5">

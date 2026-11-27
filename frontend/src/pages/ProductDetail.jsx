@@ -51,6 +51,43 @@ function Gallery({ p }) {
   )
 }
 
+// phones (< md) get an edge-to-edge swipe carousel with dots instead of the desktop gallery (thumbnail strip + hover zoom)
+function useIsPhone() {
+  const q = '(max-width: 767.98px)'
+  const [m, setM] = useState(() => typeof window !== 'undefined' && window.matchMedia(q).matches)
+  useEffect(() => { const mq = window.matchMedia(q); const h = () => setM(mq.matches); h(); mq.addEventListener?.('change', h); return () => mq.removeEventListener?.('change', h) }, [])
+  return m
+}
+
+function PhoneGallery({ p }) {
+  const box = useRef(null)
+  const [i, setI] = useState(0)
+  const count = p.images?.length || 4
+  useEffect(() => { setI(0); box.current?.scrollTo({ left: 0 }) }, [p._id])
+  const onScroll = () => { const el = box.current; if (el && el.clientWidth) setI(Math.round(el.scrollLeft / el.clientWidth)) }
+  const go = (k) => box.current?.scrollTo({ left: k * box.current.clientWidth, behavior: 'smooth' })
+  return (
+    <div className="relative -mx-4 bg-plum-50 sm:-mx-6">
+      <div ref={box} onScroll={onScroll} className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain">
+        {Array.from({ length: count }).map((_, k) => (
+          <div key={k} className="aspect-[4/5] max-h-[62svh] w-full shrink-0 snap-center">
+            <ProductImage product={p} index={k} w={900} sizes="100vw" priority={k === 0} className="h-full w-full object-cover" alt={k === 0 ? p.name : `${p.name} – photo ${k + 1}`} />
+          </div>
+        ))}
+      </div>
+      {discountPct(p) > 0 && <span className="absolute left-3 top-3 rounded-full bg-rose-500 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">{discountPct(p)}% off</span>}
+      {count > 1 && (
+        <>
+          <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white">{i + 1}/{count}</span>
+          <div className="absolute inset-x-0 bottom-2 flex justify-center">
+            {Array.from({ length: count }).map((_, k) => <button key={k} type="button" onClick={() => go(k)} aria-label={`Photo ${k + 1}`} className="px-1 py-2"><span className={`block h-1.5 rounded-full shadow transition-all ${i === k ? 'w-5 bg-white' : 'w-1.5 bg-white/65'}`} /></button>)}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function Accordion({ title, children, open: o = false }) {
   const [open, setOpen] = useState(o)
   return (
@@ -116,6 +153,7 @@ function Reviews({ p, onChange }) {
   const [form, setForm] = useState({ rating: 5, title: '', comment: '' })
   const [busy, setBusy] = useState(false)
   const [showAll, setShowAll] = useState(false)
+  const [writing, setWriting] = useState(false)
   const load = () => shopAPI.reviews(p._id).then((r) => setData(r.data)).catch(() => {})
   useEffect(() => { load() }, [p._id]) // eslint-disable-line
   const total = Object.values(data.distribution).reduce((a, b) => a + b, 0)
@@ -125,18 +163,19 @@ function Reviews({ p, onChange }) {
     catch (err) { toast.error(errMsg(err)) } finally { setBusy(false) }
   }
   return (
-    <section id="reviews" className="mt-20 grid gap-12 lg:grid-cols-12">
+    <section id="reviews" className="mt-12 grid gap-8 sm:mt-20 sm:gap-12 lg:grid-cols-12">
       <div className="lg:col-span-4">
-        <p className="eyebrow">Reviews</p><h2 className="h-section mt-2">What women say</h2>
+        <p className="eyebrow">Reviews</p><h2 className="h-section mt-2 max-md:!text-[28px]">What women say</h2>
         {p.rating?.count > 0 && (
-          <div className="mt-6 flex items-center gap-5">
-            <div className="font-display text-7xl font-semibold text-plum-800">{p.rating.avg}</div>
+          <div className="mt-4 flex items-center gap-4 sm:mt-6 sm:gap-5">
+            <div className="font-display text-5xl font-semibold text-plum-800 sm:text-7xl">{p.rating.avg}</div>
             <div><Stars value={p.rating.avg} size={16} /><p className="mt-1 text-sm text-plum-700/60">{p.rating.count} ratings</p></div>
           </div>
         )}
         <div className="mt-5 space-y-1.5">{[5, 4, 3, 2, 1].map((s) => <div key={s} className="flex items-center gap-3 text-xs"><span className="w-3">{s}</span><div className="h-2 flex-1 overflow-hidden rounded-full bg-plum-100"><div className="h-full rounded-full bg-gold-500" style={{ width: `${total ? ((data.distribution[s] || 0) / total) * 100 : 0}%` }} /></div><span className="w-6 text-right text-plum-700/60">{data.distribution[s] || 0}</span></div>)}</div>
 
-        <form onSubmit={submit} className="mt-8 rounded-2xl bg-blush p-5">
+        <button type="button" onClick={() => setWriting((w) => !w)} aria-expanded={writing} className="btn-outline btn-cta mt-5 w-full lg:hidden">{writing ? 'Close' : 'Write a review'}</button>
+        <form onSubmit={submit} className={`mt-5 rounded-2xl bg-blush p-5 lg:mt-8 ${writing ? '' : 'max-lg:hidden'}`}>
           <p className="font-display text-2xl font-semibold text-plum-800">Write a review</p>
           {!user ? <p className="mt-2 text-sm text-plum-800/70"><Link to="/login" state={{ from: `/product/${p.slug}` }} className="font-medium text-rose-500 underline">Log in</Link> to share your experience.</p> : (
             <>
@@ -170,6 +209,8 @@ export default function ProductDetail() {
   const [added, setAdded] = useState(false)
   const [stickyOn, setStickyOn] = useState(false)
   const ctaRef = useRef(null)
+  const pickerRef = useRef(null)
+  const phone = useIsPhone()
   const add = useCart((s) => s.add)
   const setCart = useUI((s) => s.setCart)
   const wished = useWishlist((s) => (p ? s.ids.includes(p._id) : false))
@@ -193,12 +234,13 @@ export default function ProductDetail() {
   const off = discountPct(p)
   const stockLeft = v.variant?.stock
   const submit = (buyNow = false) => {
-    if (v.needsSize) { setShake(true); setTimeout(() => setShake(false), 600); return toast.error('Please choose a size') }
+    if (v.needsSize) { setShake(true); setTimeout(() => setShake(false), 600); pickerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return toast.error('Please choose a size') }
     if (!v.variant || v.variant.stock < 1) return toast.error('This combination is out of stock')
     add(p, v.variant, qty)
     if (buyNow) return nav('/checkout')
     setAdded(true); setTimeout(() => setAdded(false), 1400); setCart(true)
   }
+  const wish = () => { const a = toggleWish(p._id); toast(a ? 'Added to wishlist 💗' : 'Removed from wishlist') }
   const share = async () => {
     const data = { title: p.name, text: `Look what I found on Shyfly: ${p.name}`, url: window.location.href }
     try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(data.url); toast.success('Link copied') } } catch (_) {}
@@ -225,34 +267,34 @@ export default function ProductDetail() {
   return (
     <>
       <SEO title={p.name} type="product" description={clip(p.description) || `${p.name} – ${inr(p.price)} at Shyfly Fashion. Free shipping, Cash on Delivery & easy returns.`} image={p.images?.[0]?.url} jsonLd={productLd} />
-      <div className="container-x py-6 sm:py-10">
-        <nav className="-mt-2 mb-4 flex flex-wrap items-center gap-x-1.5 text-xs uppercase tracking-wider text-plum-700/60">
+      <div className="container-x py-6 max-md:pt-0 sm:py-10">
+        <nav className="-mt-2 mb-4 flex max-md:hidden flex-wrap items-center gap-x-1.5 text-xs uppercase tracking-wider text-plum-700/60">
           <Link to="/" className="inline-block py-2 hover:text-rose-500">Home</Link><FiChevronRight size={12} />
           <Link to={`/shop/${p.category?.slug}`} className="inline-block py-2 hover:text-rose-500">{p.category?.name}</Link>
           {p.subCategory && <><FiChevronRight size={12} /><Link to={`/shop/${p.category?.slug}/${p.subCategory.slug}`} className="inline-block py-2 hover:text-rose-500">{p.subCategory.name}</Link></>}
         </nav>
 
-        <div className="grid gap-8 md:grid-cols-2 md:gap-8 sm:landscape:grid-cols-2 sm:landscape:gap-6 lg:gap-10 xl:gap-16">
-          <div className="stick-md mx-auto w-full max-w-[520px] md:max-w-none sm:landscape:max-w-none"><Gallery p={p} /></div>
+        <div className="grid gap-5 md:grid-cols-2 md:gap-8 sm:landscape:grid-cols-2 sm:landscape:gap-6 lg:gap-10 xl:gap-16">
+          <div className="stick-md mx-auto w-full">{phone ? <PhoneGallery p={p} /> : <Gallery p={p} />}</div>
 
           <div>
             <p className="eyebrow">{p.brand}</p>
-            <h1 className="mt-2 font-display text-4xl font-semibold leading-tight text-plum-800 lg:text-5xl [@media(max-height:520px)]:!text-3xl">{p.name}</h1>
+            <h1 className="mt-1 font-display text-[24px] font-semibold leading-snug text-plum-800 sm:mt-2 sm:text-4xl sm:leading-tight lg:text-5xl [@media(max-height:520px)]:!text-3xl">{p.name}</h1>
             {p.rating?.count > 0 && <a href="#reviews" className="mt-1 inline-flex items-center gap-2 py-2.5"><Stars value={p.rating.avg} size={15} /><span className="text-sm text-plum-700/70 underline underline-offset-4">{p.rating.avg} · {p.rating.count} reviews</span></a>}
-            <div className="mt-5 flex flex-wrap items-baseline gap-3">
-              <span className="text-3xl font-semibold text-plum-800">{inr(p.price)}</span>
-              {off > 0 && <><span className="text-lg text-plum-700/50 line-through">{inr(p.mrp)}</span><span className="rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-500">Save {inr(p.mrp - p.price)} ({off}%)</span></>}
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:mt-5">
+              <span className="text-[28px] font-semibold text-plum-800 sm:text-3xl">{inr(p.price)}</span>
+              {off > 0 && <><span className="text-base text-plum-700/50 line-through sm:text-lg">{inr(p.mrp)}</span><span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[13px] font-semibold text-rose-500 sm:px-3 sm:py-1 sm:text-sm">Save {inr(p.mrp - p.price)} ({off}%)</span></>}
             </div>
             <p className="mt-1 text-xs text-plum-700/60">Inclusive of all taxes</p>
 
-            <p className="mt-6 leading-relaxed text-plum-900/80">{p.description}</p>
+            <p className="mt-6 leading-relaxed text-plum-900/80 max-md:hidden">{p.description}</p>
 
-            <div className="my-7 border-y border-plum-100 py-7"><VariantPicker v={v} shake={shake} /></div>
+            <div ref={pickerRef} className="my-4 scroll-mt-[calc(var(--header-h,60px)+12px)] border-y border-plum-100 py-4 sm:my-7 sm:py-7"><VariantPicker v={v} shake={shake} /></div>
 
             <div ref={ctaRef}>
               {allSold ? <div className="rounded-2xl bg-plum-50 p-5 text-center font-medium text-plum-800">Sold out — <Link to={`/shop/${p.category?.slug}`} className="underline">see similar</Link></div> : (
                 <>
-                  <div className="max-w-[400px]">
+                  <div className="max-w-[400px] max-md:hidden">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex h-10 shrink-0 items-center rounded-full border border-plum-200">
                         <button onClick={() => setQty(Math.max(1, qty - 1))} className="grid h-full w-8 place-items-center" aria-label="Less"><FiMinus size={14} /></button>
@@ -265,25 +307,26 @@ export default function ProductDetail() {
                       <button onClick={() => submit(false)} className={`btn-plum btn-cta btn-sheen w-full ${added ? '!bg-green-600' : ''}`}>{added ? <><FiCheck size={16} /> Added</> : 'Add to bag'}</button>
                       <button onClick={() => submit(true)} className="btn-rose btn-cta w-full">Buy it now</button>
                     </div>
-                  {stockLeft > 0 && stockLeft <= 5 && <p className="mt-3 text-sm font-medium text-rose-500">🔥 Only {stockLeft} left in stock</p>}
                   </div>
+                  {stockLeft > 0 && stockLeft <= 5 && <p className="mt-3 text-sm font-medium text-rose-500 max-md:-mt-1 max-md:mb-1">🔥 Only {stockLeft} left in stock</p>}
                 </>
               )}
-              <div className="mt-4 flex flex-wrap gap-5 text-sm text-plum-800">
+              <div className="mt-1 flex flex-wrap gap-x-5 text-sm text-plum-800 sm:mt-4">
                 <button onClick={() => { const r = toggleCompare(p); if (r === 'full') toast.error('You can compare up to 4 items') }} className="inline-flex items-center gap-2 py-2.5 hover:text-rose-500"><FiShuffle /> {inCompare ? 'In compare' : 'Compare'}</button>
                 <button onClick={share} className="inline-flex items-center gap-2 py-2.5 hover:text-rose-500"><FiShare2 /> Share</button>
                 {cfg.whatsapp && <a href={waLink(cfg.whatsapp, `Hi Shyfly! I'd like to order: ${p.name}${colorText}${sizeText}\n${window.location.href}`)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 py-2.5 hover:text-green-600"><FaWhatsapp /> Order on WhatsApp</a>}
               </div>
             </div>
 
-            <div className="mt-7"><Delivery /></div>
+            <div className="mt-4 sm:mt-7"><Delivery /></div>
 
-            <div className="mt-6 grid grid-cols-3 gap-3 text-center text-xs text-plum-800">
-              {[[FiTruck, 'Free shipping', `above ${inr(cfg.freeShippingMin)}`], [FiRefreshCw, cfg.returnWindowDays > 0 ? `${cfg.returnWindowDays}-day returns` : 'Quality checked', cfg.returnWindowDays > 0 ? 'easy exchange' : 'before dispatch'], [FiShield, 'Secure checkout', 'UPI · Cards · COD']].map(([I, a, b]) => <div key={a} className="rounded-2xl bg-blush p-3"><I className="mx-auto mb-1.5 text-rose-500" size={20} /><b className="block">{a}</b><span className="text-plum-700/60">{b}</span></div>)}
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[11px] text-plum-800 sm:mt-6 sm:gap-3 sm:text-xs">
+              {[[FiTruck, 'Free shipping', `above ${inr(cfg.freeShippingMin)}`], [FiRefreshCw, cfg.returnWindowDays > 0 ? `${cfg.returnWindowDays}-day returns` : 'Quality checked', cfg.returnWindowDays > 0 ? 'easy exchange' : 'before dispatch'], [FiShield, 'Secure checkout', 'UPI · Cards · COD']].map(([I, a, b]) => <div key={a} className="rounded-2xl bg-blush p-2.5 sm:p-3"><I className="mx-auto mb-1.5 text-rose-500" size={20} /><b className="block">{a}</b><span className="text-plum-700/60">{b}</span></div>)}
             </div>
 
-            <div className="mt-8 border-t border-plum-100">
-              <Accordion title="Product details" open>
+            <div className="mt-5 border-t border-plum-100 sm:mt-8">
+              {p.description && <div className="md:hidden"><Accordion title="About this product" open><p className="leading-relaxed">{p.description}</p></Accordion></div>}
+              <Accordion title="Product details" open={!phone}>
                 <dl className="grid grid-cols-[110px_1fr] gap-y-2">{(p.details?.length ? p.details : [{ label: 'Material', value: p.material }]).filter((d) => d.value).map((d) => <Fragment key={d.label}><dt className="text-plum-700/60">{d.label}</dt><dd>{d.value}</dd></Fragment>)}</dl>
               </Accordion>
               {p.careNote && <Accordion title="Care">{p.careNote}</Accordion>}
@@ -294,14 +337,14 @@ export default function ProductDetail() {
 
         <Reviews p={p} onChange={(rating) => setP((x) => ({ ...x, rating }))} />
 
-        {rel.products.length > 0 && <section className="mt-24"><Reveal><p className="eyebrow">You may also like</p><h2 className="h-section mt-2">Similar styles</h2></Reveal><div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-9 lg:grid-cols-4">{rel.products.slice(0, 4).map((x) => <ProductCard key={x._id} product={x} />)}</div></section>}
-        {rel.look.length > 0 && <section className="mt-20"><Reveal><p className="eyebrow">Complete the look</p><h2 className="h-section mt-2">Pair it with</h2></Reveal><div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-9 lg:grid-cols-4">{rel.look.map((x) => <ProductCard key={x._id} product={x} />)}</div></section>}
-        {recent.length > 0 && <section className="mt-20"><Reveal><p className="eyebrow">Recently viewed</p></Reveal><div className="no-scrollbar mt-6 flex gap-4 overflow-x-auto">{recent.map((x) => <div key={x._id} className="w-40 shrink-0 sm:w-52"><ProductCard product={x} /></div>)}</div></section>}
+        {rel.products.length > 0 && <section className="mt-12 sm:mt-24"><Reveal><p className="eyebrow">You may also like</p><h2 className="h-section mt-2 max-md:!text-[28px]">Similar styles</h2></Reveal><div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-6 sm:mt-8 sm:gap-x-4 sm:gap-y-9 lg:grid-cols-4">{rel.products.slice(0, 4).map((x) => <ProductCard key={x._id} product={x} />)}</div></section>}
+        {rel.look.length > 0 && <section className="mt-10 sm:mt-20"><Reveal><p className="eyebrow">Complete the look</p><h2 className="h-section mt-2 max-md:!text-[28px]">Pair it with</h2></Reveal><div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-6 sm:mt-8 sm:gap-x-4 sm:gap-y-9 lg:grid-cols-4">{rel.look.map((x) => <ProductCard key={x._id} product={x} />)}</div></section>}
+        {recent.length > 0 && <section className="mt-10 sm:mt-20"><Reveal><p className="eyebrow">Recently viewed</p></Reveal><div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto sm:mt-6 sm:gap-4">{recent.map((x) => <div key={x._id} className="w-40 shrink-0 sm:w-52"><ProductCard product={x} /></div>)}</div></section>}
       </div>
 
       <AnimatePresence>
         {stickyOn && !allSold && (
-          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-[var(--bnav-h,58px)] z-30 border-t border-plum-100 bg-white p-3 lg:bg-white/95 lg:backdrop-blur-xl lg:bottom-0">
+          <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed inset-x-0 bottom-[var(--bnav-h,0px)] z-30 border-t border-plum-100 bg-white p-3 max-md:hidden lg:bg-white/95 lg:backdrop-blur-xl lg:bottom-0">
             <div className="container-x flex items-center gap-4">
               <div className="hidden h-12 w-10 overflow-hidden rounded-lg sm:block"><ProductImage product={p} w={100} className="h-full w-full object-cover" /></div>
               <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{p.name}</p><p className="text-sm font-semibold text-plum-800">{inr(p.price)}</p></div>
@@ -310,6 +353,17 @@ export default function ProductDetail() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* phones: always-on action bar (replaces the tab bar on product pages) */}
+      {!allSold && (
+        <div className="safe-b fixed inset-x-0 bottom-0 z-30 border-t border-plum-100 bg-white shadow-[0_-6px_20px_-12px_rgba(107,21,68,.25)] md:hidden">
+          <div className="flex items-center gap-2.5 px-3 py-2.5">
+            <button type="button" onClick={wish} aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'} className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-plum-200 text-plum-800 active:scale-95">{wished ? <FaHeart className="text-rose-500" size={19} /> : <FiHeart size={20} />}</button>
+            <button type="button" onClick={() => submit(false)} className={`h-12 flex-1 rounded-full bg-plum-700 text-[12.5px] font-bold uppercase tracking-wider text-white transition active:scale-[.98] ${added ? '!bg-green-600' : ''}`}>{added ? '✓ Added' : 'Add to bag'}</button>
+            <button type="button" onClick={() => submit(true)} className="h-12 flex-1 rounded-full bg-rose-500 text-[12.5px] font-bold uppercase tracking-wider text-white transition active:scale-[.98]">Buy now</button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FiHeart, FiShoppingBag, FiUser, FiMenu, FiX, FiChevronDown, FiTruck, FiShuffle, FiArrowRight } from 'react-icons/fi'
 import { useCart, useWishlist, useCompare, useAuth, useUI } from '../store'
-import { useCategories, useLockBody } from '../lib/hooks'
+import { useCategories, useLockBody, bottomNavHidden } from '../lib/hooks'
 import { ProductArt } from '../lib/art'
 import ThemeToggle from './ThemeToggle'
 import SearchBox from './SearchBox'
@@ -127,33 +127,34 @@ export default function Navbar() {
 
   const shadow = 'shadow-[0_8px_30px_-12px_rgba(107,21,68,.25)]'
   const onCheckout = loc.pathname.startsWith('/checkout')
+  const bagInTabBar = !bottomNavHidden(loc.pathname) // below lg the Bag lives in the bottom tab bar → no duplicate icon up here
 
   return (
     <>
       {/* top bar — pinned on phones/tablets; on desktop it scrolls away (the category row below stays pinned) */}
       <header ref={bar} className={`land-static sticky top-0 z-40 bg-white transition-shadow duration-300 lg:static lg:z-auto ${stuck ? `${shadow} lg:shadow-none` : ''} ${onCheckout ? 'border-b border-plum-50 lg:border-b-0' : ''}`}>
         <div className="container-x">
-          <div className="flex h-[60px] items-center gap-4 sm:h-[68px] lg:h-[76px]">
+          <div className="flex h-[60px] items-center gap-2 sm:h-[68px] sm:gap-4 lg:h-[76px]">
             <button className="-ml-2 p-2 lg:hidden" onClick={() => setMenu(true)} aria-label="Menu"><FiMenu size={24} /></button>
 
             <Link to="/" className="shrink-0" aria-label="Shyfly home">
-              <img src="/logo-mark.png" alt="Shyfly Fashion" className="h-9 w-auto sm:h-11 lg:h-[52px]" width="84" height="52" />
+              <img src="/logo-mark.png" alt="Shyfly Fashion" className="h-8 w-auto min-[360px]:h-9 sm:h-11 lg:h-[52px]" width="84" height="52" />
             </Link>
 
             <SearchBox id="search-desktop" className="mx-auto hidden max-w-xl flex-1 lg:block" />
 
-            <div className="ml-auto flex items-center gap-1 sm:gap-2 lg:ml-0">
+            <div className="ml-auto flex items-center gap-0.5 min-[360px]:gap-1 sm:gap-2 lg:ml-0">
               <Link to="/track" className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-[12px] uppercase tracking-[.16em] text-plum-800 transition hover:bg-plum-50 xl:flex"><FiTruck size={17} /> Track</Link>
               {typeof user?.candies === 'number' && (
                 <Link key={user.candies} to="/account?tab=candy" aria-label={`${user.candies} candies — open My Candy`} className="inline-flex h-8 shrink-0 animate-pop items-center gap-0.5 rounded-full bg-blush px-2 text-[13px] min-[360px]:gap-1 min-[360px]:px-2.5 font-semibold tabular-nums text-plum-800 transition hover:text-rose-500 lg:hidden">
                   <span aria-hidden="true" className="text-[15px] leading-none">🍬</span>{candyLabel(user.candies)}
                 </Link>
               )}
-              <ThemeToggle className="p-2.5 transition hover:text-rose-500" />
+              <ThemeToggle className="p-2 transition hover:text-rose-500 min-[360px]:p-2.5" />
               <Link to="/compare" data-tip="Compare" className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Compare"><FiShuffle size={20} /><Badge n={cmpCount} /></Link>
-              <Link to="/wishlist" data-tip="Wishlist" className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Wishlist"><FiHeart size={21} /><Badge n={wishCount} /></Link>
+              <Link to="/wishlist" data-tip="Wishlist" className="tip relative p-2 transition hover:text-rose-500 min-[360px]:p-2.5 sm:p-2" aria-label="Wishlist"><FiHeart size={21} /><Badge n={wishCount} /></Link>
               <Link to={user ? '/account' : '/login'} data-tip={user ? `Hi, ${(user.name || 'Me').split(' ')[0]}` : 'Login'} className="tip relative hidden p-2 transition hover:text-rose-500 sm:block" aria-label="Account"><FiUser size={21} /></Link>
-              <button onClick={() => setCart(true)} data-tip="Bag" className="tip relative p-2.5 transition hover:text-rose-500" aria-label="Bag"><FiShoppingBag size={22} /><Badge n={cartCount} /></button>
+              <button onClick={() => setCart(true)} data-tip="Bag" className={`tip relative p-2 transition hover:text-rose-500 min-[360px]:p-2.5 ${bagInTabBar ? 'max-lg:hidden' : ''}`} aria-label="Bag"><FiShoppingBag size={22} /><Badge n={cartCount} /></button>
             </div>
           </div>
         </div>

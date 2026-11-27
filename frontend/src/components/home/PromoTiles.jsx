@@ -23,7 +23,7 @@ export default function PromoTiles({ tiles = [] }) {
         >
           <Link
             to={t.to}
-            className={`group relative flex h-full min-h-[200px] flex-col justify-between overflow-hidden rounded-[22px] p-4 transition duration-500 hover:-translate-y-1 hover:shadow-lift sm:min-h-[260px] sm:p-5 ${BG[i % 4]}`}
+            className={`group relative flex h-full min-h-[168px] flex-col justify-between overflow-hidden rounded-[22px] p-4 transition duration-500 hover:-translate-y-1 hover:shadow-lift sm:min-h-[260px] sm:p-5 ${BG[i % 4]}`}
           >
             <div className="relative z-10">
               <span

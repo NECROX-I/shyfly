@@ -26,7 +26,7 @@ export default function TrackOrder() {
   useEffect(() => { document.getElementById('track-phone')?.focus() }, [])
 
   return (
-    <div className="container-x max-w-3xl py-14">
+    <div className="container-x max-w-3xl py-6 sm:py-14">
       <SEO title="Track your order" noindex />
       <div className="text-center"><div className="mx-auto w-16"><Butterfly /></div><h1 className="h-section mt-2">Track your order</h1><p className="mt-2 text-plum-700/70">Enter your order number and the mobile number used at checkout.</p></div>
       <form onSubmit={lookup} className="mt-8 grid gap-3 rounded-3xl bg-blush p-5 sm:grid-cols-[1fr_1fr_auto]">

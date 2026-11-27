@@ -141,12 +141,12 @@ function PriceDetails({ count, mrpTotal, mrpDiscount, discount, candy = 0, shipp
 // ── Bag line ──────────────────────────────────────────────────
 function BagItem({ i, checked, onToggle, onRemove, onSize, onQty, returnDays, eta }) {
   const off = discountPct({ mrp: i.mrp, price: i.price })
-  const pill = 'inline-flex min-h-8 items-center gap-1 rounded bg-plum-50 px-2.5 py-1.5 text-xs font-bold text-plum-800 transition hover:bg-rose-50 hover:text-rose-500'
+  const pill = 'inline-flex min-h-9 items-center gap-1 rounded bg-plum-50 px-3 py-1.5 sm:min-h-8 sm:px-2.5 text-xs font-bold text-plum-800 transition hover:bg-rose-50 hover:text-rose-500'
   return (
     <div className={`relative flex gap-3 rounded border border-plum-100 bg-white p-3 sm:gap-4 sm:p-4 ${checked ? '' : 'opacity-60'}`}>
       <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded bg-plum-50 sm:h-36 sm:w-28">
         <Link to={`/product/${i.slug}`}><ProductImage product={{ name: i.name, images: i.image ? [{ url: i.image }] : [], category: i.category }} w={260} className="h-full w-full object-cover" /></Link>
-        <input type="checkbox" checked={checked} onChange={onToggle} aria-label={`Select ${i.name}`} className="absolute left-1.5 top-1.5 h-5 w-5 accent-rose-500" />
+        <label className="absolute left-0 top-0 grid h-11 w-11 cursor-pointer place-items-center"><input type="checkbox" checked={checked} onChange={onToggle} aria-label={`Select ${i.name}`} className="h-5 w-5 accent-rose-500" /></label>
       </div>
       <div className="min-w-0 flex-1 pr-7 text-sm">
         <p className="text-sm font-bold text-plum-900">Shyfly</p>
@@ -512,7 +512,7 @@ export default function Checkout() {
   const candyBal = Math.max(0, Math.floor(user?.candies || 0))
   const maxPct = cfg.candy?.maxRedeemPercent ?? 50
   const candyAvail = sel.length ? Math.max(0, Math.min(candyBal, Math.floor((after * maxPct) / 100))) : 0
-  const candyUsed = step === 'payment' && useCandy ? candyAvail : 0
+  const candyUsed = useCandy ? candyAvail : 0
   const total = after + shipping - candyUsed
 
   // ── addresses ──
@@ -671,6 +671,18 @@ export default function Checkout() {
   )
   if (step !== 'bag' && !user) return <Navigate to="/login" replace state={{ from: `/checkout?step=${step}`, mode: 'register', reason: 'checkout' }} />
   if (step !== 'bag' && !sel.length) return <Navigate to="/checkout" replace />
+  // 🍬 redeem box — lives in the BAG step (before the address), one source of truth for phone + desktop layouts
+  const candyBox = candyBal > 0 && (
+    <section className="rounded border border-rose-200 bg-rose-50/60 p-3.5 sm:p-4">
+      <label className={`flex items-start gap-3 text-sm ${candyAvail > 0 ? 'cursor-pointer' : 'opacity-70'}`}>
+        <input type="checkbox" checked={useCandy && candyAvail > 0} disabled={candyAvail <= 0} onChange={(e) => setUseCandy(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-rose-500" />
+        <span className="min-w-0">
+          <b className="block text-plum-900">🍬 Use {candyAvail} candies · save {inr(candyAvail)}</b>
+          <span className="mt-0.5 block text-xs text-plum-700/70">{candyBal > candyAvail ? `Balance ${candyBal} · ` : ''}1 candy = ₹1 · up to {maxPct}% of the order</span>
+        </span>
+      </label>
+    </section>
+  )
   if (step === 'payment' && !addr) return <Navigate to="/checkout?step=address" replace />
 
   const returnDays = cfg.returnWindowDays
@@ -686,6 +698,15 @@ export default function Checkout() {
   const off = (id) => (id === 'cod' ? codBlocked : onlineOff)
   const curTab = METHODS.find((m) => m.id === tab)
   const shownOffers = showAllOffers ? offers : offers.slice(0, 2)
+  const offersBox = offers.length > 0 && (
+    <div className="rounded border border-plum-100 bg-white p-3.5 sm:p-4">
+      <p className="flex items-center gap-2 text-sm font-bold text-plum-900"><FiPercent className="text-rose-500" /> Available offers</p>
+      <ul className="mt-2 space-y-1.5 text-[13px] text-plum-800/85">
+        {shownOffers.map((o) => <li key={o.code}>• <b>{o.code}</b>{o.description ? ` — ${o.description}` : ''}{o.minOrder > 0 ? ` (min. order ${inr(o.minOrder)})` : ''}</li>)}
+      </ul>
+      {offers.length > 2 && <button type="button" onClick={() => setShowAllOffers((v) => !v)} className="mt-1 py-2 text-xs font-bold text-rose-500">{showAllOffers ? 'Show less' : `Show ${offers.length - 2} more`} <FiChevronDown className={`inline transition ${showAllOffers ? 'rotate-180' : ''}`} /></button>}
+    </div>
+  )
 
   const doMove = (list) => { toWishlist(list); dropFromBag(new Set(list.map((i) => i.key))); toast.success('Moved to wishlist 💗'); close() }
   const doRemove = (list) => { dropFromBag(new Set(list.map((i) => i.key))); toast.success(list.length > 1 ? 'Items removed from bag' : 'Item removed from bag'); close() }
@@ -708,7 +729,7 @@ export default function Checkout() {
           {step === 'bag' && (
             <>
               {/* delivery strip */}
-              <div className="flex items-center justify-between gap-3 rounded border border-plum-100 bg-white p-3.5 text-sm">
+              <div className="flex items-center justify-between gap-3 rounded border border-plum-100 bg-white p-3 text-sm sm:p-3.5">
                 {user && addr ? (
                   <>
                     <p className="flex min-w-0 items-center gap-2"><FiMapPin className="shrink-0 text-rose-500" /><span className="truncate">Deliver to: <b>{addr.name}, {addr.pincode}</b></span></p>
@@ -727,29 +748,22 @@ export default function Checkout() {
                 )}
               </div>
 
-              {/* available offers */}
-              {offers.length > 0 && (
-                <div className="rounded border border-plum-100 bg-white p-4">
-                  <p className="flex items-center gap-2 text-sm font-bold text-plum-900"><FiPercent className="text-rose-500" /> Available offers</p>
-                  <ul className="mt-2 space-y-1.5 text-[13px] text-plum-800/85">
-                    {shownOffers.map((o) => <li key={o.code}>• <b>{o.code}</b>{o.description ? ` — ${o.description}` : ''}{o.minOrder > 0 ? ` (min. order ${inr(o.minOrder)})` : ''}</li>)}
-                  </ul>
-                  {offers.length > 2 && <button type="button" onClick={() => setShowAllOffers((v) => !v)} className="mt-2 text-xs font-bold text-rose-500">{showAllOffers ? 'Show less' : `Show ${offers.length - 2} more`} <FiChevronDown className={`inline transition ${showAllOffers ? 'rotate-180' : ''}`} /></button>}
-                </div>
-              )}
+              {/* available offers (phones: after the items, so the bag itself comes first) */}
+              {offersBox && <div className="max-lg:hidden">{offersBox}</div>}
 
               <FreeShipBar subtotal={subtotal} />
+              {candyBox && <div className="lg:hidden">{candyBox}</div>}
 
               {/* selection bar */}
               <div className="flex items-center justify-between gap-3 rounded border border-plum-100 bg-white p-3.5">
-                <label className="flex min-h-[40px] cursor-pointer items-center gap-3 text-xs font-bold uppercase tracking-wide text-plum-800">
+                <label className="flex min-h-[40px] cursor-pointer items-center gap-3 text-xs font-bold uppercase leading-tight tracking-wide text-plum-800">
                   <input type="checkbox" className="h-5 w-5 accent-rose-500" checked={allSel} onChange={toggleAll} />
                   {sel.length}/{items.length} items selected
                 </label>
                 <div className="flex items-center text-[11px] font-bold uppercase tracking-wide text-plum-700">
                   <button type="button" onClick={() => selectedFirst() && setDlg({ type: 'bulkRemove' })} className="px-2 py-3 hover:text-rose-500">Remove</button>
                   <span className="text-plum-300">|</span>
-                  <button type="button" onClick={() => selectedFirst() && setDlg({ type: 'bulkMove' })} className="px-2 py-3 hover:text-rose-500">Move to wishlist</button>
+                  <button type="button" onClick={() => selectedFirst() && setDlg({ type: 'bulkMove' })} className="px-2 py-3 hover:text-rose-500"><span className="sm:hidden">♡ Wishlist</span><span className="max-sm:hidden">Move to wishlist</span></button>
                 </div>
               </div>
 
@@ -761,6 +775,7 @@ export default function Checkout() {
               <Link to="/wishlist" className="flex items-center justify-between rounded border border-plum-100 bg-white p-4 text-sm font-bold uppercase tracking-wide text-plum-800 hover:border-rose-300">
                 <span className="flex items-center gap-2"><FiHeart className="text-rose-500" /> Add more from wishlist</span><FiChevronRight />
               </Link>
+              {offersBox && <div className="lg:hidden">{offersBox}</div>}
             </>
           )}
 
@@ -850,13 +865,10 @@ export default function Checkout() {
               </div>
 
               {candyBal > 0 && (
-                <label className={`flex items-start gap-3 rounded border p-4 text-sm ${candyAvail > 0 ? 'cursor-pointer border-plum-100 bg-white' : 'border-plum-100 bg-plum-50/50 opacity-70'}`}>
-                  <input type="checkbox" checked={useCandy && candyAvail > 0} disabled={candyAvail <= 0} onChange={(e) => setUseCandy(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-rose-500" />
-                  <span className="min-w-0">
-                    <b className="text-plum-900">🍬 Use {candyAvail} candies (= {inr(candyAvail)} off)</b>
-                    <span className="mt-0.5 block text-xs text-plum-700/70">You have {candyBal} candies · 1 candy = ₹1 · up to {maxPct}% of the order can be paid with candies</span>
-                  </span>
-                </label>
+                <div className="flex items-center justify-between gap-3 rounded border border-plum-100 bg-white p-3.5 text-sm">
+                  <span className="min-w-0 text-plum-900">🍬 {candyUsed > 0 ? <><b>{candyUsed} candies</b> applied · −{inr(candyUsed)}</> : <>You have <b>{candyBal}</b> candies</>}</span>
+                  {(candyUsed > 0 || candyAvail > 0) && <button type="button" onClick={() => setUseCandy((v) => !v)} className="shrink-0 py-2 text-xs font-bold uppercase tracking-wide text-rose-500">{candyUsed > 0 ? 'Remove' : `Apply · save ${inr(candyAvail)}`}</button>}
+                </div>
               )}
 
               <details className="rounded border border-plum-100 bg-white p-4 text-sm">
@@ -888,6 +900,8 @@ export default function Checkout() {
               )}
             </section>
           )}
+
+          {step === 'bag' && candyBox && <div className="max-lg:hidden">{candyBox}</div>}
 
           <div className="rounded border border-plum-100 bg-white p-5">
             <PriceDetails count={sel.reduce((s, i) => s + i.qty, 0)} mrpTotal={mrpTotal} mrpDiscount={mrpDiscount} discount={discount} candy={candyUsed} shipping={shipping} shippingFee={cfg.shippingFee} total={total}

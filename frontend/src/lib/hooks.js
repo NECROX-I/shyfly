@@ -17,6 +17,9 @@ export function useCategories() {
 let cfgCache = null
 let cfgPromise = null
 const DEFAULT_CFG = { loaded: false, content: defaultContent, freeShippingMin: 999, shippingFee: 79, codFee: 0, codMax: 15000, codEnabled: true, returnWindowDays: 7, onlinePayment: false, whatsapp: '', announcements: [], store: {}, delivery: { min: 4, max: 7 } }
+// pages that show their own sticky action bar instead of the phone tab bar
+export const bottomNavHidden = (pathname) => pathname.startsWith('/checkout') || pathname.startsWith('/product/')
+
 export function useConfig() {
   const [cfg, setCfg] = useState(cfgCache || DEFAULT_CFG)
   useEffect(() => {
@@ -49,8 +52,8 @@ export function useCountdownToMidnight() {
 export function useCssVarHeight(ref, name, deps = []) {
   useEffect(() => {
     const el = ref.current
-    if (!el) return
     const root = document.documentElement
+    if (!el) { root.style.setProperty(name, '0px'); return }   // bar not rendered (e.g. hidden on checkout / product pages) → nothing to clear
     const set = () => {
       const cs = getComputedStyle(el)
       const pinned = cs.position === 'sticky' || cs.position === 'fixed'

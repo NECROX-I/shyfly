@@ -17,7 +17,7 @@ exports.storeConfig = asyncHandler(async (req, res) => {
       freeShippingMin: S.freeShippingMin,
       shippingFee: S.shippingFee,
       codFee: 0,
-      candy: { rate: 1, maxRedeemPercent: require("../utils/candy").RULES.maxRedeemPercent },
+      candy: (({ rate, maxRedeemPercent, referralBonus, signupBonus }) => ({ rate, maxRedeemPercent, referralBonus, signupBonus }))(require("../utils/candy").RULES),
       codMax: S.codMax,
       codEnabled: S.codEnabled,
       returnWindowDays: S.returnWindowDays,

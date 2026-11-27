@@ -65,7 +65,7 @@ export default function Login() {
   };
   const on = (k) => (e) => setF({ ...f, [k]: e.target.value });
   return (
-    <div className="container-x grid max-w-5xl gap-10 py-14 lg:grid-cols-2">
+    <div className="container-x grid max-w-5xl gap-10 py-8 sm:py-14 lg:grid-cols-2">
       <SEO title="Login" noindex />
       <div className="relative hidden overflow-hidden rounded-[32px] bg-gradient-to-br from-plum-800 to-rose-500 p-12 text-white lg:block">
         <div className="bg-petal absolute inset-0 opacity-40" />
@@ -79,7 +79,7 @@ export default function Login() {
         </p>
       </div>
       <form onSubmit={submit} className="self-center">
-        <h1 className="font-display text-5xl font-semibold text-plum-800">
+        <h1 className="font-display text-[34px] font-semibold text-plum-800 sm:text-5xl">
           {mode === "login" ? "Welcome back" : "Create account"}
         </h1>
         {mode === "register" && (
