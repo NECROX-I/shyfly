@@ -1,0 +1,42 @@
+diff --git a/frontend/src/pages/Checkout.jsx b/frontend/src/pages/Checkout.jsx
+index e10af0d..182a733 100644
+--- a/frontend/src/pages/Checkout.jsx
++++ b/frontend/src/pages/Checkout.jsx
+@@ -672,16 +672,28 @@ export default function Checkout() {
+   if (step !== 'bag' && !user) return <Navigate to="/login" replace state={{ from: `/checkout?step=${step}`, mode: 'register', reason: 'checkout' }} />
+   if (step !== 'bag' && !sel.length) return <Navigate to="/checkout" replace />
+   // 🍬 redeem box — lives in the BAG step (before the address), one source of truth for phone + desktop layouts
++  // 🍬 redeem card — the whole card is the tap target; a switch + highlighted border make "on" unmistakable (works in dark mode too)
++  const candyOn = useCandy && candyAvail > 0
+   const candyBox = candyBal > 0 && (
+-    <section className="rounded border border-rose-200 bg-rose-50/60 p-3.5 sm:p-4">
+-      <label className={`flex items-start gap-3 text-sm ${candyAvail > 0 ? 'cursor-pointer' : 'opacity-70'}`}>
+-        <input type="checkbox" checked={useCandy && candyAvail > 0} disabled={candyAvail <= 0} onChange={(e) => setUseCandy(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-rose-500" />
+-        <span className="min-w-0">
+-          <b className="block text-plum-900">🍬 Use {candyAvail} candies · save {inr(candyAvail)}</b>
+-          <span className="mt-0.5 block text-xs text-plum-700/70">{candyBal > candyAvail ? `Balance ${candyBal} · ` : ''}1 candy = ₹1 · up to {maxPct}% of the order</span>
+-        </span>
+-      </label>
+-    </section>
++    <label className={`flex items-center gap-3 rounded-xl border-2 p-3.5 transition-colors sm:p-4 ${candyAvail > 0 ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'} ${candyOn ? 'border-rose-500 bg-rose-50' : 'border-plum-100 bg-transparent'}`}>
++      <input type="checkbox" role="switch" className="peer sr-only" checked={candyOn} disabled={candyAvail <= 0} onChange={(e) => setUseCandy(e.target.checked)} aria-label={`Use ${candyAvail} candies and save ${inr(candyAvail)}`} />
++      <span aria-hidden="true" className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-blush text-[22px] leading-none">🍬</span>
++      <span className="min-w-0 flex-1">
++        {candyAvail > 0 ? (
++          <>
++            <b className="block text-[15px] font-semibold leading-snug text-plum-900">Use {candyAvail} candies</b>
++            <span className={`block text-[13px] leading-snug ${candyOn ? 'font-semibold text-rose-500' : 'text-plum-700'}`}>{candyOn ? `✓ Applied — you save ${inr(candyAvail)}` : `Save ${inr(candyAvail)} on this order`}</span>
++            <span className="mt-0.5 block text-[11px] leading-snug text-plum-700/70">{candyBal > candyAvail ? `Balance ${candyBal} · ` : ''}1 candy = ₹1 · up to {maxPct}% of the order</span>
++          </>
++        ) : (
++          <>
++            <b className="block text-[15px] font-semibold leading-snug text-plum-900">You have {candyBal} candies</b>
++            <span className="block text-[13px] leading-snug text-plum-700">Can’t be used on this order</span>
++          </>
++        )}
++      </span>
++      <span aria-hidden="true" className="relative h-7 w-12 shrink-0 rounded-full bg-gray-300 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-6 after:w-6 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:bg-rose-500 peer-checked:after:translate-x-5 peer-focus-visible:ring-2 peer-focus-visible:ring-rose-300 peer-focus-visible:ring-offset-2 peer-disabled:opacity-50 dark:bg-white/25 dark:peer-checked:bg-rose-500" />
++    </label>
+   )
+   if (step === 'payment' && !addr) return <Navigate to="/checkout?step=address" replace />
+ 
